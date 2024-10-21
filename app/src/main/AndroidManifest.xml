@@ -17,6 +17,7 @@
             android:exported="true">
         </activity>
 
+        <!-- Configura LoginActivity como la actividad de inicio -->
         <activity android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
