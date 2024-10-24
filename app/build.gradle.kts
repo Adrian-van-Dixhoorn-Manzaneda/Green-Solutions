@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.example.greensolutions"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.greensolutions"
@@ -52,5 +52,6 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.firebaseui:firebase-ui-auth:7.2.0")
     implementation("com.google.firebase:firebase-firestore-ktx:24.4.0") // O la versión más reciente
-    implementation ("com.google.android.gms:play-services-auth:20.4.0")
+    implementation ("com.google.android.gms:play-services-auth:20.6.0")
+    implementation ("com.google.firebase:firebase-auth:22.1.0'")
 }
