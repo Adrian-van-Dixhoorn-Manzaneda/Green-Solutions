@@ -12,16 +12,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -67,22 +59,24 @@ public class LoginActivity extends AppCompatActivity {
         // Inicializar FirebaseAuth
         mAuth = FirebaseAuth.getInstance();
 
-        // Configurar Google Sign-In para solicitar el ID del usuario, dirección de correo electrónico y perfil básico
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id)) // default_web_client_id del archivo google-services.json
-                .requestEmail()
-                .build();
-
-        // Crear el cliente de GoogleSignIn
-        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
         // Configurar el botón de inicio de sesión de Google
-        findViewById(R.id.botonlogingoogle).setOnClickListener(new View.OnClickListener() {
+        /*findViewById(R.id.botonlogingoogle).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 signIn();
             }
-        });
+        });*/
+
+        // Verificar si hay un usuario autenticado en SharedPreferences
+        String userEmail = getSharedPreferences("LoginPrefs", MODE_PRIVATE).getString("userEmail", null);
+        if (userEmail != null) {
+            // Redirigir a MainActivity si el usuario ya ha iniciado sesión
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
 
     }
 
@@ -91,7 +85,6 @@ public class LoginActivity extends AppCompatActivity {
         String email = editTextEmail.getText().toString().trim();
         String password = editTextPassword.getText().toString().trim();
 
-        // Validate input fields
         if (TextUtils.isEmpty(email)) {
             editTextEmail.setError("Email requerido");
             editTextEmail.requestFocus();
@@ -103,7 +96,7 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        // Query Firestore to find the user by email
+        // Consulta Firestore para encontrar el usuario por email
         db.collection("usuarios")
                 .whereEqualTo("email", email)
                 .get()
@@ -115,27 +108,31 @@ public class LoginActivity extends AppCompatActivity {
                             String storedPassword = document.getString("password");
 
                             if (password.equals(storedPassword)) {
-                                // Successful login, redirect to MainActivity
+                                // Guardar el email en SharedPreferences para mantener la sesión
+                                getSharedPreferences("LoginPrefs", MODE_PRIVATE)
+                                        .edit()
+                                        .putString("userEmail", email)
+                                        .apply();
+
+                                // Redirigir a MainActivity
                                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                                 startActivity(intent);
                                 finish();
                             } else {
-                                // Password incorrect
                                 Toast.makeText(LoginActivity.this, "Contraseña incorrecta", Toast.LENGTH_SHORT).show();
                             }
                         } else {
-                            // User not found
                             Toast.makeText(LoginActivity.this, "Usuario no encontrado", Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        // Error retrieving user
                         Toast.makeText(LoginActivity.this, "Error al verificar el usuario", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
 
-    private void signIn() {
+
+    /*private void signIn() {
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
@@ -171,7 +168,7 @@ public class LoginActivity extends AppCompatActivity {
                         Log.w("FirebaseAuth", "signInWithCredential:failure", task.getException());
                     }
                 });
-    }
+    }*/
 
 }
 
