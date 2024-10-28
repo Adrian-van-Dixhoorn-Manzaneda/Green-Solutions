@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "384756580893-db7p1p871d2f8bua7p8aasv24ths4f7g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.greensolutions",
+            "certificate_hash": "a34edbdde61be6116c148f3a6a2808bcf69abbfb"
+          }
+        },
+        {
           "client_id": "384756580893-vvci5f6ton9cddcjal5vc621vk2j3sg0.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
