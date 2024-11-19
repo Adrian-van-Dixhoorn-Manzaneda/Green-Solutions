@@ -6,6 +6,6 @@
     android:layout_height="wrap_content"
     android:padding="16dp"
     android:text="Este programa ha sido desarrollado como ejemplo en el curso de
-    Android para demostrar cómo se pueden lanzar nuevas actividades desde la actividad
-    principal.">
+Android para demostrar cómo se pueden lanzar nuevas actividades desde la actividad
+principal.">
 </TextView>

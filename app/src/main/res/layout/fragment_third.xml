@@ -3,16 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1E98D7"
-    tools:context=".RutasFragment">
+    tools:context=".ThirdFragment">
 
     <!-- TODO: Update blank fragment layout -->
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Rutas Fragment"
-        android:textSize="26dp"
-        android:textColor="@color/white"/>
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textSize="24dp"
+        android:textAlignment="center"
+        android:text="Third Fragment" />
 
 </FrameLayout>
