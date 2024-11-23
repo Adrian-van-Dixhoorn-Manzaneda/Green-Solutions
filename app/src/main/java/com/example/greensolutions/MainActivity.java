@@ -29,12 +29,6 @@ public class MainActivity extends AppCompatActivity {
         // Configura la Toolbar como ActionBar
         setSupportActionBar(toolbar);
 
-        // Carga el fragmento por defecto (FirstFragment)
-        if (savedInstanceState == null) {
-            loadFragment(new FirstFragment());
-        }
-
-
         // Configura la navegación inferior
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnItemSelectedListener(new BottomNavigationView.OnItemSelectedListener() {
@@ -42,15 +36,22 @@ public class MainActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 Fragment fragment = null;
                 if (item.getItemId() == R.id.nav_home) {
-                    fragment = new FirstFragment(); // Fragmento de inicio
+                    fragment = new HomeFragment(); // Fragmento de inicio
                 } else if (item.getItemId() == R.id.nav_add) {
-                    fragment = new SecondFragment(); // Fragmento de añadir
+                    fragment = new RutasFragment(); // Fragmento de añadir
                 } else if (item.getItemId() == R.id.nav_profile) {
-                    fragment = new ThirdFragment(); // Fragmento de perfil
+                    fragment = new PerfilFragment(); // Fragmento de perfil
                 }
                 return loadFragment(fragment);
             }
         });
+
+
+        // Carga el fragmento por defecto (FirstFragment)
+        if (savedInstanceState == null) {
+            bottomNavigationView.setSelectedItemId(R.id.nav_home); // Select "Home"
+            loadFragment(new HomeFragment());
+        }
     }
 
     //******************************************************************
@@ -68,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Si se selecciona "Preferencias" del menú principal
-        if (item.getItemId() == R.id.action_settings) {
+        /**if (item.getItemId() == R.id.action_settings) {
             loadFragment(new FirstFragment());
             return true;
         }
@@ -84,17 +85,17 @@ public class MainActivity extends AppCompatActivity {
             loadFragment(new ThirdFragment());
             return true;
         }
-
-        // Si se selecciona "Acerca de..."
-        if (item.getItemId() == R.id.acercaDe) {
-            lanzarAcercaDe(); // Abre la actividad de "Acerca de"
-            return true;
-        }
-
         //cerrar sesion
 
         if (item.getItemId() == R.id.action_close_session) {
             closeSession();
+            return true;
+        } **/
+
+
+        // Si se selecciona "Acerca de..."
+        if (item.getItemId() == R.id.acercaDe) {
+            lanzarAcercaDe(); // Abre la actividad de "Acerca de"
             return true;
         }
 

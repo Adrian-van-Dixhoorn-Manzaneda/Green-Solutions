@@ -4,16 +4,17 @@
     tools:context=".MainActivity">
 
     <!-- Opción del menu superior" -->
-    <item
+    <!-- <item
         android:id="@+id/action_settings"
         android:title="Home"
         android:icon="@android:drawable/ic_menu_preferences"
-        android:orderInCategory="5"
+
         app:showAsAction="never"/>
 
     <item
         android:id="@+id/item_sub_option1"
         android:title="Add"
+        android:orderInCategory="5"
         android:icon="@android:drawable/ic_menu_info_details"
         app:showAsAction="never"/>
     <item
@@ -28,7 +29,7 @@
         android:icon="@android:drawable/ic_lock_power_off"
         android:orderInCategory="99"
         app:showAsAction="never" />
-
+    -->
 
     <!-- Opción "Acerca de..." en el menú principal -->
     <item
