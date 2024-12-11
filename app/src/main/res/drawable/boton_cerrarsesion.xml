@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/drawable/boton_background.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#D30606" /> <!-- Background color of boton -->
+    <corners android:radius="16dp" /> <!-- Rounded corners -->
+</shape>
