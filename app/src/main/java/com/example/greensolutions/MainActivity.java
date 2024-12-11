@@ -44,6 +44,11 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return loadFragment(fragment);
             }
+
+
+            //Configutacion de Galeria
+
+
         });
 
 
@@ -53,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
             loadFragment(new HomeFragment());
         }
     }
+
+
 
     //******************************************************************
     // Menu
