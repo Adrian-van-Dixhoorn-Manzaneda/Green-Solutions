@@ -17,4 +17,9 @@
         android:icon="@drawable/baseline_person_24"
         android:title="Profile" />
 
+    <item
+        android:id="@+id/nav_publish"
+        android:icon="@drawable/camara"
+        android:title="Publicar" />
+
 </menu>

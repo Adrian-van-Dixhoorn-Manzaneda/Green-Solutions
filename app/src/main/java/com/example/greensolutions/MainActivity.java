@@ -42,6 +42,10 @@ public class MainActivity extends AppCompatActivity {
                 } else if (item.getItemId() == R.id.nav_profile) {
                     fragment = new PerfilFragment(); // Fragmento de perfil
                 }
+                else if (item.getItemId() == R.id.nav_publish)
+                {
+                    fragment = new PublicarFragment();
+                }
                 return loadFragment(fragment);
             }
         });
