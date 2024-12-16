@@ -29,9 +29,12 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".AcercaDeActivity"
-            android:label="Acerca de ..."
-            android:theme="@style/Theme.AppCompat.Light.Dialog"/>
+        <activity
+            android:name=".AcercaDeActivity"
+            android:label="Acerca de Nosotros"
+            android:banner="@drawable/homebackgound"
+            android:theme="@style/CustomDialogTheme" />
+
 
         <activity android:name=".RegisterActivity"
             android:label="Registro" />
