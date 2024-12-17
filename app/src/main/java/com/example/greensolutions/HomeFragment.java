@@ -15,12 +15,20 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class HomeFragment extends Fragment {
 
@@ -29,7 +37,8 @@ public class HomeFragment extends Fragment {
     private Button actionButton;
     private Button farolasButton;
     private int[] imageResIds = {R.drawable.poste1, R.drawable.poste2, R.drawable.poste3};
-    private String[] imageOptions = {"Rutas Central", "Rutas del Norte", "Rutas del Sur"};
+    private String[] imageOptions = {"Ruta_1", "Ruta_2", "Ruta_3"};
+    //private String[] imageOptions = new String[10];
     private boolean isImageFixed = false;
     private TextView welcomeTextView;
     private int selectedPosition = 0;
@@ -46,8 +55,13 @@ public class HomeFragment extends Fragment {
         actionButton = rootView.findViewById(R.id.selectButton);
         welcomeTextView = rootView.findViewById(R.id.tv_welcome);
 
+        //updateImageOptionsWithRouteIds(imageOptions);
         // Cargar nombre del usuario desde Firebase
         loadUserNameFromFirebase();
+
+        updateImageOptionsWithRouteIds();
+
+        getFarolaSensorValues(imageOptions[0]);
 
         RecyclerView recyclerView = rootView.findViewById(R.id.recycler_weather);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -159,6 +173,97 @@ public class HomeFragment extends Fragment {
             welcomeTextView.setText("Por favor, inicia sesión para continuar");
         }
     }
+
+    private void updateImageOptionsWithRouteIds() {
+        // Obtener instancia de Firestore
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // Consultar la colección de rutas
+        db.collection("Rutas")  // Suponiendo que las rutas están en la colección "Rutas"
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        QuerySnapshot querySnapshot = task.getResult();
+                        if (querySnapshot != null) {
+                            // Lista para almacenar los IDs de las rutas
+                            List<String> routeIds = new ArrayList<>();
+
+                            // Recorrer los documentos de la colección "Rutas"
+                            for (DocumentSnapshot document : querySnapshot.getDocuments()) {
+                                // Obtener el ID de cada ruta (el ID está asociado al documento)
+                                String routeId = document.getId();
+                                // Añadir el ID al listado
+                                routeIds.add(routeId);
+                            }
+
+                            // Ahora actualizar imageOptions con los primeros 3 IDs (si hay suficientes)
+                            for (int i = 0; i < imageOptions.length; i++) {
+                                if (i < routeIds.size()) {
+                                    // Reemplazar en imageOptions con los IDs de las rutas
+                                    imageOptions[i] = routeIds.get(i);
+                                }
+                            }
+
+                            // Aquí imageOptions está actualizado con los IDs de las rutas.
+                            Log.i(TAG, "imageOptions actualizado con los IDs de las rutas: " + Arrays.toString(imageOptions));
+                        }
+                    } else {
+                        Log.w(TAG, "Error al obtener las rutas", task.getException());
+                    }
+                });
+    }
+
+    private void getFarolaSensorValues(String routeId) {
+        // Obtener instancia de Firestore
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        Log.i(TAG, routeId);
+        // Consultar la colección "Farolas" dentro de una ruta específica
+        db.collection("Rutas")
+                .document(routeId)          // Acceder al documento de la ruta específica
+                .collection("Farolas")      // Subcolección "Farolas"
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        // Iterar a través de todas las farolas de la ruta
+                        for (QueryDocumentSnapshot farolaDoc : task.getResult()) {
+                            String farolaId = farolaDoc.getId();
+
+                            // Acceder a los campos de cada farola
+                            db.collection("Rutas")
+                                    .document(routeId)
+                                    .collection("Farolas")
+                                    .document(farolaId)
+                                    .get()
+                                    .addOnCompleteListener(subTask -> {
+                                        if (subTask.isSuccessful()) {
+                                            DocumentSnapshot farolaData = subTask.getResult();
+
+                                            // Obtener valores de sensores
+                                            Long emergencias = farolaData.getLong("Emergencias");
+                                            Long gas = farolaData.getLong("Gas");
+                                            Long humedad = farolaData.getLong("Humedad");
+                                            Long temperatura = farolaData.getLong("Temperatura");
+
+                                            // Imprimir en Logcat los valores de sensores
+                                            Log.i(TAG, "Farola ID: " + farolaId);
+                                            Log.i(TAG, "Emergencias: " + (emergencias != null ? emergencias : "No disponible"));
+                                            Log.i(TAG, "Gas: " + (gas != null ? gas : "No disponible"));
+                                            Log.i(TAG, "Humedad: " + (humedad != null ? humedad : "No disponible"));
+                                            Log.i(TAG, "Temperatura: " + (temperatura != null ? temperatura : "No disponible"));
+                                        } else {
+                                            Log.w(TAG, "Error al obtener datos de la farola " + farolaId, subTask.getException());
+                                        }
+                                    });
+                        }
+                    } else {
+                        Log.w(TAG, "Error al obtener farolas de la ruta " + routeId, task.getException());
+                    }
+                });
+    }
+
+
+
 
 
 }
