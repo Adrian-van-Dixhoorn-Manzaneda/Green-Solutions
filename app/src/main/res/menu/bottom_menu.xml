@@ -2,9 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/nav_add"
-        android:icon="@drawable/baseline_map_24"
-        android:title="Add" />
+        android:id="@+id/nav_publish"
+        android:icon="@drawable/camara"
+        android:title="Publicar" />
 
     <item
         android:id="@+id/nav_home"
@@ -17,9 +17,6 @@
         android:icon="@drawable/baseline_person_24"
         android:title="Profile" />
 
-    <item
-        android:id="@+id/nav_publish"
-        android:icon="@drawable/camara"
-        android:title="Publicar" />
+
 
 </menu>

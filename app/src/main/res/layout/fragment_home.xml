@@ -46,7 +46,7 @@
                 android:id="@+id/selectButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Seleccionar" />
+                android:text="Empezar Ruta" />
         </LinearLayout>
 
         <!-- Imagen debajo del spinner y botón -->

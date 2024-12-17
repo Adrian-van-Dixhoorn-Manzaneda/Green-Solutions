@@ -121,7 +121,7 @@ public class PublicarFragment extends Fragment {
     // Aquí hay que poner el fragment de la galeria de fotos publicadas
     public void publicarFoto(View view) {
         if (uriUltimaFoto != null) {
-            Intent intent = new Intent(requireContext(), RutasFragment.class);
+            Intent intent = new Intent(requireContext(), PublicarFragment.class);
             intent.putExtra("fotoUri", uriUltimaFoto.toString());
             startActivity(intent);
         } else {

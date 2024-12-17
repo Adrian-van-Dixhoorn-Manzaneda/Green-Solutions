@@ -49,8 +49,6 @@ public class MainActivity extends AppCompatActivity {
                 Fragment fragment = null;
                 if (item.getItemId() == R.id.nav_home) {
                     fragment = new HomeFragment(); // Fragmento de inicio
-                } else if (item.getItemId() == R.id.nav_add) {
-                    fragment = new RutasFragment(); // Fragmento de añadir
                 } else if (item.getItemId() == R.id.nav_profile) {
                     fragment = new PerfilFragment(); // Fragmento de perfil
                 }

@@ -11,10 +11,17 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,17 +29,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HomeFragment extends Fragment {
+public class FarolasFragment extends Fragment {
 
     private ImageView imageView;
     private Spinner spinner;
     private Button actionButton;
-    private Button farolasButton;
     private int[] imageResIds = {R.drawable.poste1, R.drawable.poste2, R.drawable.poste3};
-    private String[] imageOptions = {"Rutas Central", "Rutas del Norte", "Rutas del Sur"};
+    private String[] imageOptions = {"Farola Central", "Farola del Norte", "Farola del Sur"};
     private boolean isImageFixed = false;
-    private TextView welcomeTextView;
     private int selectedPosition = 0;
+    private TextView welcomeTextView;
+
     private static final String TAG = "HomeFragment";
 
     @Override
@@ -53,13 +60,13 @@ public class HomeFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         // Datos para RecyclerView
-        List<RutasData> rutasData = new ArrayList<>();
-        rutasData.add(new RutasData("Emergencia", "65%", R.drawable.humidity));
-        rutasData.add(new RutasData("Gas", "10%", R.drawable.precipitation));
-        rutasData.add(new RutasData("Humedad", "15 km/h", R.drawable.wind));
-        rutasData.add(new RutasData("Temperatura", "10%", R.drawable.precipitation));
+        List<WeatherData> weatherData = new ArrayList<>();
+        weatherData.add(new WeatherData("Emergencia", "65%", R.drawable.humidity));
+        weatherData.add(new WeatherData("Gas", "10%", R.drawable.precipitation));
+        weatherData.add(new WeatherData("Humedad", "15 km/h", R.drawable.wind));
+        weatherData.add(new WeatherData("Temperatura", "10%", R.drawable.precipitation));
 
-        RutasAdapter adapter2 = new RutasAdapter(rutasData);
+        WeatherAdapter adapter2 = new WeatherAdapter(weatherData);
         recyclerView.setAdapter(adapter2);
 
         // Configuración del Spinner
@@ -90,12 +97,6 @@ public class HomeFragment extends Fragment {
                 spinner.setEnabled(false);
                 actionButton.setText("Quitar");
 
-                // Redirigir al fragmento de Rutas
-                Fragment farolasFragment = new FarolasFragment();
-                getParentFragmentManager().beginTransaction()
-                        .replace(R.id.framelayout, farolasFragment)
-                        .addToBackStack(null) // Opcional: para permitir volver atrás
-                        .commit();
             } else {
                 // Restaura el estado inicial
                 isImageFixed = false;
@@ -105,8 +106,6 @@ public class HomeFragment extends Fragment {
                 imageView.setImageResource(R.drawable.ic_launcher_foreground); // Imagen por defecto
             }
         });
-
-
 
         return rootView;
     }
