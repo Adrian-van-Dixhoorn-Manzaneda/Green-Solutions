@@ -16,7 +16,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
     private List<Integer> imageResIds;
     private Context context;
 
-    public GalleryAdapter(Context context, List<Integer> imageResIds, List<String> farolaIds) {
+    public GalleryAdapter(Context context, List<Integer> imageResIds) {
         this.context = context;
         this.imageResIds = imageResIds;
     }
