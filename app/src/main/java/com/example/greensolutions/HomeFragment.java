@@ -1,5 +1,6 @@
 package com.example.greensolutions;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -35,26 +36,43 @@ public class HomeFragment extends Fragment {
     private Button actionButton;
     private int[] imageResIds = {R.drawable.poste1, R.drawable.poste2, R.drawable.poste3};
     private String[] imageOptions = {"Ruta_1", "luigi2", "luigi3"};
-    //private String[] imageOptions = new String[10];
     private boolean isImageFixed = false;
     private TextView welcomeTextView;
     private int selectedPosition = 0;
     private static final String TAG = "HomeFragment";
+
+
+    private FirebaseFirestore firestore;
+    private String userEmail;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
 
+
+        // Inicializa Firestore
+        firestore = FirebaseFirestore.getInstance();
+
+        // Recupera el email del usuario almacenado en SharedPreferences
+        if (getActivity() != null) {
+            userEmail = getActivity()
+                    .getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE)
+                    .getString("userEmail", null);
+        }
+
+        // Verifica y carga el nombre del usuario
+        if (userEmail != null) {
+            loadUserNameFromFirebase();
+        } else {
+            Log.e(TAG, "Correo del usuario no encontrado en SharedPreferences");
+        }
+
         // Inicialización de vistas
         spinner = rootView.findViewById(R.id.spinner);
         imageView = rootView.findViewById(R.id.imageView);
         actionButton = rootView.findViewById(R.id.selectButton);
         welcomeTextView = rootView.findViewById(R.id.tv_welcome);
-
-        //updateImageOptionsWithRouteIds(imageOptions);
-        // Cargar nombre del usuario desde Firebase
-        loadUserNameFromFirebase();
 
 
         // Configuración del Spinner
@@ -164,34 +182,30 @@ public class HomeFragment extends Fragment {
      * Carga el nombre del usuario desde Firebase usando su UID.
      */
     private void loadUserNameFromFirebase() {
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        // Accede a la colección "usuarios" y busca por el campo "email"
+        firestore.collection("usuarios")
+                .whereEqualTo("email", userEmail) // Filtra documentos por el email
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (!querySnapshot.isEmpty()) {
+                        // Toma el primer documento encontrado
+                        DocumentSnapshot document = querySnapshot.getDocuments().get(0);
 
-        if (firebaseAuth.getCurrentUser() != null) {
-            String userUID = firebaseAuth.getCurrentUser().getUid();
-            DatabaseReference databaseRef = FirebaseDatabase.getInstance()
-                    .getReference("usuarios").child(userUID);
-
-            // Asignar nombre predeterminado desde Google
-            String googleUserName = getGoogleUserName();
-            welcomeTextView.setText("Bienvenido, " + (googleUserName != null ? googleUserName : "Usuario Desconocido"));
-
-            // Consultar Firebase para el nombre del usuario
-            databaseRef.get().addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    DataSnapshot snapshot = task.getResult();
-                    if (snapshot != null && snapshot.child("nombre").exists()) {
-                        String userName = snapshot.child("nombre").getValue(String.class);
-                        if (userName != null) {
+                        if (document.contains("nombre")) {
+                            String userName = document.getString("nombre");
                             welcomeTextView.setText("Bienvenido, " + userName);
+                        } else {
+                            welcomeTextView.setText("Bienvenido, Usuario Desconocido");
                         }
+                    } else {
+                        Log.e(TAG, "No se encontró un usuario con el email proporcionado");
+                        welcomeTextView.setText("Usuario no registrado");
                     }
-                } else {
-                    Log.e(TAG, "Error al consultar Firebase: " + task.getException().getMessage());
-                }
-            });
-        } else {
-            welcomeTextView.setText("Por favor, inicia sesión para continuar");
-        }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error al obtener el nombre del usuario", e);
+                    welcomeTextView.setText("Error al cargar los datos del usuario");
+                });
     }
 
 
