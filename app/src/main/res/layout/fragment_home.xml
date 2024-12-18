@@ -59,6 +59,14 @@
             android:layout_marginTop="8dp" />
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/tv_welcome2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#000000"
+        android:text="Datos de la Ruta:"
+        android:textSize="18sp"
+        android:textStyle="normal" />
     <!-- RecyclerView para mostrar datos -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_weather"

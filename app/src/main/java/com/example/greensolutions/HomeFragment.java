@@ -26,18 +26,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class HomeFragment extends Fragment {
 
     private ImageView imageView;
     private Spinner spinner;
     private Button actionButton;
-    private Button farolasButton;
     private int[] imageResIds = {R.drawable.poste1, R.drawable.poste2, R.drawable.poste3};
-    private String[] imageOptions = {"Ruta_1", "Ruta_2", "Ruta_3"};
+    private String[] imageOptions = {"Ruta_1", "luigi2", "luigi3"};
     //private String[] imageOptions = new String[10];
     private boolean isImageFixed = false;
     private TextView welcomeTextView;
@@ -59,22 +56,9 @@ public class HomeFragment extends Fragment {
         // Cargar nombre del usuario desde Firebase
         loadUserNameFromFirebase();
 
-        updateImageOptionsWithRouteIds();
 
-        getFarolaSensorValues(imageOptions[0]);
 
-        RecyclerView recyclerView = rootView.findViewById(R.id.recycler_weather);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Datos para RecyclerView
-        List<RutasData> rutasData = new ArrayList<>();
-        rutasData.add(new RutasData("Emergencia", "65%", R.drawable.humidity));
-        rutasData.add(new RutasData("Gas", "10%", R.drawable.precipitation));
-        rutasData.add(new RutasData("Humedad", "15 km/h", R.drawable.wind));
-        rutasData.add(new RutasData("Temperatura", "10%", R.drawable.precipitation));
-
-        RutasAdapter adapter2 = new RutasAdapter(rutasData);
-        recyclerView.setAdapter(adapter2);
 
         // Configuración del Spinner
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, imageOptions);
@@ -85,16 +69,60 @@ public class HomeFragment extends Fragment {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                updateImageOptionsWithRouteIds();
+
                 if (!isImageFixed) {
                     imageView.setImageResource(imageResIds[position]);
                     selectedPosition = position;
+
+                    // Obtener la ruta seleccionada del spinner
+                    String selectedRouteId = imageOptions[position];
+
+                    getFarolaSensorValues(selectedRouteId, sensorResults -> {
+                        // Este bloque se ejecutará cuando los datos estén listos
+                        Log.i(TAG, "Resultados recibidos desde el callback:");
+                        Log.i(TAG, "Emergencias: " + sensorResults.get(0));
+                        Log.i(TAG, "Gas: " + sensorResults.get(1));
+                        Log.i(TAG, "Humedad (promedio): " + sensorResults.get(2));
+                        Log.i(TAG, "Temperatura (promedio): " + sensorResults.get(3));
+
+
+                        RecyclerView recyclerView = rootView.findViewById(R.id.recycler_weather);
+                        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+
+                        // Datos para RecyclerView
+                        List<RutasData> rutasData = new ArrayList<>();
+                        rutasData.add(new RutasData("Emergencia", sensorResults.get(0).toString(), R.drawable.humidity));
+                        rutasData.add(new RutasData("Gas", sensorResults.get(1).toString(), R.drawable.precipitation));
+                        rutasData.add(new RutasData("Humedad", sensorResults.get(2).toString()+"km/h", R.drawable.wind));
+                        rutasData.add(new RutasData("Temperatura", sensorResults.get(3).toString()+"%", R.drawable.precipitation));
+
+                        RutasAdapter adapter2 = new RutasAdapter(rutasData);
+                        recyclerView.setAdapter(adapter2);
+
+
+                    });
                 }
+
+
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
+
+
+
+
+
+
+
+
+
+
 
         // Manejo del botón
         actionButton.setOnClickListener(v -> {
@@ -174,6 +202,9 @@ public class HomeFragment extends Fragment {
         }
     }
 
+
+
+
     private void updateImageOptionsWithRouteIds() {
         // Obtener instancia de Firestore
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -213,54 +244,63 @@ public class HomeFragment extends Fragment {
                 });
     }
 
-    private void getFarolaSensorValues(String routeId) {
-        // Obtener instancia de Firestore
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        Log.i(TAG, routeId);
-        // Consultar la colección "Farolas" dentro de una ruta específica
+    public interface SensorDataCallback {
+        void onSensorDataReady(List<Long> sensorResults);
+    }
+
+    private void getFarolaSensorValues(String routeId, SensorDataCallback callback) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        Log.i(TAG, "Ruta ID: " + routeId);
+
         db.collection("Rutas")
-                .document(routeId)          // Acceder al documento de la ruta específica
-                .collection("Farolas")      // Subcolección "Farolas"
+                .document(routeId)
+                .collection("Farolas")
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        // Iterar a través de todas las farolas de la ruta
+                        List<Long> sensorResults = new ArrayList<>(Arrays.asList(0L, 0L, 0L, 0L));
+                        // Índices: 0 = Emergencias, 1 = Gas, 2 = Humedad, 3 = Temperatura
+
+                        int farolaCount = 0;
+
                         for (QueryDocumentSnapshot farolaDoc : task.getResult()) {
-                            String farolaId = farolaDoc.getId();
+                            Long emergencias = farolaDoc.getLong("Emergencias");
+                            Long gas = farolaDoc.getLong("Gas");
+                            Long humedad = farolaDoc.getLong("Humedad");
+                            Long temperatura = farolaDoc.getLong("Temperatura");
 
-                            // Acceder a los campos de cada farola
-                            db.collection("Rutas")
-                                    .document(routeId)
-                                    .collection("Farolas")
-                                    .document(farolaId)
-                                    .get()
-                                    .addOnCompleteListener(subTask -> {
-                                        if (subTask.isSuccessful()) {
-                                            DocumentSnapshot farolaData = subTask.getResult();
+                            // Sumar valores (verifica nulos)
+                            sensorResults.set(0, sensorResults.get(0) + (emergencias != null ? emergencias : 0)); // Emergencias
+                            if (gas != null && gas == 1) sensorResults.set(1, 1L); // Gas
+                            sensorResults.set(2, sensorResults.get(2) + (humedad != null ? humedad : 0)); // Humedad
+                            sensorResults.set(3, sensorResults.get(3) + (temperatura != null ? temperatura : 0)); // Temperatura
 
-                                            // Obtener valores de sensores
-                                            Long emergencias = farolaData.getLong("Emergencias");
-                                            Long gas = farolaData.getLong("Gas");
-                                            Long humedad = farolaData.getLong("Humedad");
-                                            Long temperatura = farolaData.getLong("Temperatura");
-
-                                            // Imprimir en Logcat los valores de sensores
-                                            Log.i(TAG, "Farola ID: " + farolaId);
-                                            Log.i(TAG, "Emergencias: " + (emergencias != null ? emergencias : "No disponible"));
-                                            Log.i(TAG, "Gas: " + (gas != null ? gas : "No disponible"));
-                                            Log.i(TAG, "Humedad: " + (humedad != null ? humedad : "No disponible"));
-                                            Log.i(TAG, "Temperatura: " + (temperatura != null ? temperatura : "No disponible"));
-                                        } else {
-                                            Log.w(TAG, "Error al obtener datos de la farola " + farolaId, subTask.getException());
-                                        }
-                                    });
+                            farolaCount++;
                         }
+
+                        // Calcular promedios para humedad y temperatura
+                        if (farolaCount > 0) {
+                            sensorResults.set(2, sensorResults.get(2) / farolaCount); // Promedio Humedad
+                            sensorResults.set(3, sensorResults.get(3) / farolaCount); // Promedio Temperatura
+                        }
+
+                        // Mostrar resultados en Logcat
+                        Log.i(TAG, "Resultados de Sensores:");
+                        Log.i(TAG, "Emergencias: " + sensorResults.get(0));
+                        Log.i(TAG, "Gas: " + sensorResults.get(1));
+                        Log.i(TAG, "Humedad (promedio): " + sensorResults.get(2));
+                        Log.i(TAG, "Temperatura (promedio): " + sensorResults.get(3));
+
+                        // Llamar al callback con los resultados
+                        callback.onSensorDataReady(sensorResults);
                     } else {
                         Log.w(TAG, "Error al obtener farolas de la ruta " + routeId, task.getException());
                     }
                 });
     }
+
+
 
 
 
