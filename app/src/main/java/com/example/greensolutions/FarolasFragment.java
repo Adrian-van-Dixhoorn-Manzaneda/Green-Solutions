@@ -61,10 +61,10 @@ public class FarolasFragment extends Fragment {
 
         // Datos para RecyclerView
         List<WeatherData> weatherData = new ArrayList<>();
-        weatherData.add(new WeatherData("Emergencia", "65%", R.drawable.humidity));
-        weatherData.add(new WeatherData("Gas", "10%", R.drawable.precipitation));
-        weatherData.add(new WeatherData("Humedad", "15 km/h", R.drawable.wind));
-        weatherData.add(new WeatherData("Temperatura", "10%", R.drawable.precipitation));
+        weatherData.add(new WeatherData("Emergencia", "1", R.drawable.humidity));
+        weatherData.add(new WeatherData("Gas", "0", R.drawable.precipitation));
+        weatherData.add(new WeatherData("Humedad", "15%", R.drawable.wind));
+        weatherData.add(new WeatherData("Temperatura", "10 ºC", R.drawable.precipitation));
 
         WeatherAdapter adapter2 = new WeatherAdapter(weatherData);
         recyclerView.setAdapter(adapter2);
