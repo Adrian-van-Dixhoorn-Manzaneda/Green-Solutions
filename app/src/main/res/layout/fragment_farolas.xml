@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- Contenedor de galería y selector de farolas -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Horizontal Chain for Spinner and Button -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- Spinner para seleccionar Farola -->
+            <Spinner
+                android:id="@+id/farolaSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:minHeight="48dp" />
+
+            <!-- Botón de acción -->
+            <Button
+                android:id="@+id/selectButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Empezar Ruta"
+                />
+
+        </LinearLayout>
+
+
+
+        <!-- ViewPager2 para galería de fotos -->
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/galleryViewPager"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:layout_marginTop="8dp" />
+    </LinearLayout>
+
+
+
+    <!-- Título para datos de sensores -->
+    <TextView
+        android:id="@+id/tv_welcome2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#000000"
+        android:text="Datos de la Farola:"
+        android:textSize="18sp"
+        android:textStyle="normal"
+        android:layout_marginTop="16dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp" />
+
+    <!-- RecyclerView para mostrar datos -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_weather"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="8dp"
+        android:clipToPadding="false"
+        android:scrollbars="vertical" />
+
+</LinearLayout>
