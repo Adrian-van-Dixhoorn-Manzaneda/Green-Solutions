@@ -4,37 +4,39 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <!-- Título de Bienvenida con imagen de fondo -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:gravity="center"
-        android:background="@drawable/homebackgound"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/tv_welcome"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-    </LinearLayout>
-
     <!-- Contenedor de galería y selector de farolas -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="8dp">
+        android:orientation="vertical">
 
-        <!-- Spinner para seleccionar Farola -->
-        <Spinner
-            android:id="@+id/farolaSpinner"
+        <!-- Horizontal Chain for Spinner and Button -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:padding="8dp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- Spinner para seleccionar Farola -->
+            <Spinner
+                android:id="@+id/farolaSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:minHeight="48dp" />
+
+            <!-- Botón de acción -->
+            <Button
+                android:id="@+id/selectButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Empezar Ruta"
+                />
+
+        </LinearLayout>
+
+
 
         <!-- ViewPager2 para galería de fotos -->
         <androidx.viewpager2.widget.ViewPager2
@@ -44,14 +46,7 @@
             android:layout_marginTop="8dp" />
     </LinearLayout>
 
-    <!-- Botón de acción -->
-    <Button
-        android:id="@+id/selectButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Empezar Ruta"
-        android:layout_gravity="center"
-        android:layout_marginTop="16dp" />
+
 
     <!-- Título para datos de sensores -->
     <TextView
