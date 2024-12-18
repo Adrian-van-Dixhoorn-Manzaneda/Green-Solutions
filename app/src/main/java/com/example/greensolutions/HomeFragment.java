@@ -57,9 +57,6 @@ public class HomeFragment extends Fragment {
         loadUserNameFromFirebase();
 
 
-
-
-
         // Configuración del Spinner
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, imageOptions);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -115,38 +112,33 @@ public class HomeFragment extends Fragment {
         });
 
 
-
-
-
-
-
-
-
-
-
         // Manejo del botón
         actionButton.setOnClickListener(v -> {
             if (!isImageFixed) {
-                // Fija la imagen seleccionada y cambia el botón a "Quitar"
                 isImageFixed = true;
                 spinner.setEnabled(false);
                 actionButton.setText("Quitar");
 
-                // Redirigir al fragmento de Rutas
+                // Pass the selectedRouteId to FarolasFragment
                 Fragment farolasFragment = new FarolasFragment();
+                Bundle args = new Bundle();
+                args.putString("selectedRouteId", imageOptions[selectedPosition]); // Pass the selected ID
+                farolasFragment.setArguments(args);
+
                 getParentFragmentManager().beginTransaction()
                         .replace(R.id.framelayout, farolasFragment)
-                        .addToBackStack(null) // Opcional: para permitir volver atrás
+                        .addToBackStack(null) // Optional: allow back navigation
                         .commit();
             } else {
-                // Restaura el estado inicial
                 isImageFixed = false;
                 spinner.setEnabled(true);
                 actionButton.setText("Seleccionar");
-                spinner.setSelection(0); // Resetea el Spinner a la primera opción
-                imageView.setImageResource(R.drawable.ic_launcher_foreground); // Imagen por defecto
+                spinner.setSelection(0);
+                imageView.setImageResource(R.drawable.ic_launcher_foreground);
             }
         });
+
+
 
 
 
