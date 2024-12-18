@@ -5,36 +5,31 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.Spinner;
-import android.widget.TextView;
 
-import androidx.annotation.NonNull;
+import android.widget.Button;
+
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
+
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import androidx.viewpager2.widget.ViewPager2;
+
+
 public class FarolasFragment extends Fragment {
 
-    private ImageView imageView;
-    private Spinner spinner;
+    private ViewPager2 galleryViewPager;
     private Button actionButton;
-    private int[] imageResIds = {R.drawable.poste1, R.drawable.poste2, R.drawable.poste3};
-    private String[] imageOptions = {"Farola 1", "Farola 2", "Farola 3"};
-    private boolean isImageFixed = false;
-    private int selectedPosition = 0;
+    private List<Integer> imageResIds = Arrays.asList(R.drawable.poste1, R.drawable.poste2, R.drawable.poste3);
+    private List<String> farolaIds = new ArrayList<>();
     private String routeId = null; // To store the passed Route ID
     private static final String TAG = "FarolasFragment";
 
@@ -53,32 +48,27 @@ public class FarolasFragment extends Fragment {
         }
 
         // Initialize Views
-        spinner = rootView.findViewById(R.id.spinner);
-        imageView = rootView.findViewById(R.id.imageView);
+        galleryViewPager = rootView.findViewById(R.id.galleryViewPager);
         actionButton = rootView.findViewById(R.id.selectButton);
 
         // RecyclerView for displaying sensor data
         RecyclerView recyclerView = rootView.findViewById(R.id.recycler_weather);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Update spinner options with Farola IDs
-        updateImageOptionsWithFarolasIds();
+        // Update Farola IDs based on Route ID
+        updateFarolaIds(() -> {
+            // Configure the ViewPager2 once Farola IDs are fetched
+            GalleryAdapter galleryAdapter = new GalleryAdapter(getContext(), imageResIds, farolaIds);
+            galleryViewPager.setAdapter(galleryAdapter);
 
-        // Configure Spinner
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, imageOptions);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-
-        // Handle Spinner Selection
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (!isImageFixed) {
-                    imageView.setImageResource(imageResIds[position]);
-                    selectedPosition = position;
+            // Handle page changes to fetch sensor data for the current Farola
+            galleryViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+                @Override
+                public void onPageSelected(int position) {
+                    super.onPageSelected(position);
+                    String selectedFarolaId = farolaIds.get(position);
 
                     // Fetch sensor data for the selected Farola
-                    String selectedFarolaId = imageOptions[position];
                     getFarolaSensorValues(selectedFarolaId, sensorResults -> {
                         // Update RecyclerView with sensor data
                         List<WeatherData> weatherData = new ArrayList<>();
@@ -91,13 +81,10 @@ public class FarolasFragment extends Fragment {
                         recyclerView.setAdapter(adapter2);
                     });
                 }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
+            });
         });
 
+        // Configure Button
         actionButton.setText("Terminar Ruta");
         actionButton.setOnClickListener(v -> {
             // Navegar de vuelta a RutasFragment
@@ -108,14 +95,13 @@ public class FarolasFragment extends Fragment {
                     .commit();
         });
 
-
         return rootView;
     }
 
     /**
      * Fetch and update Farola IDs based on the provided Route ID.
      */
-    private void updateImageOptionsWithFarolasIds() {
+    private void updateFarolaIds(Runnable onFarolasUpdated) {
         if (routeId == null) {
             Log.e(TAG, "Route ID is null. Cannot fetch Farola IDs.");
             return;
@@ -131,19 +117,13 @@ public class FarolasFragment extends Fragment {
                     if (task.isSuccessful()) {
                         QuerySnapshot querySnapshot = task.getResult();
                         if (querySnapshot != null) {
-                            List<String> farolaIds = new ArrayList<>();
+                            farolaIds.clear();
                             for (DocumentSnapshot farolaDoc : querySnapshot.getDocuments()) {
                                 farolaIds.add(farolaDoc.getId());
                             }
 
-                            // Update spinner options
-                            imageOptions = farolaIds.toArray(new String[0]);
-                            Log.i(TAG, "Farola IDs updated: " + Arrays.toString(imageOptions));
-
-                            // Refresh the spinner with updated options
-                            ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, imageOptions);
-                            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                            spinner.setAdapter(adapter);
+                            Log.i(TAG, "Farola IDs updated: " + farolaIds);
+                            onFarolasUpdated.run(); // Notify that Farola IDs are updated
                         }
                     } else {
                         Log.w(TAG, "Error fetching Farola IDs", task.getException());
@@ -189,3 +169,4 @@ public class FarolasFragment extends Fragment {
         void onSensorDataReady(List<Long> sensorResults);
     }
 }
+

@@ -27,36 +27,21 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Horizontal Chain for Spinner and Button -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <Spinner
-                android:id="@+id/spinner"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                android:minHeight="48dp" />
-
-            <Button
-                android:id="@+id/selectButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Empezar Ruta" />
-        </LinearLayout>
-
-        <!-- Imagen debajo del spinner y botón -->
-        <ImageView
-            android:id="@+id/imageView"
+        <!-- ViewPager2 para galería de fotos -->
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/galleryViewPager"
             android:layout_width="match_parent"
             android:layout_height="250dp"
-            android:layout_marginTop="8dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_launcher_foreground" />
+            android:layout_marginTop="8dp" />
+
+        <!-- Botón debajo de la galería -->
+        <Button
+            android:id="@+id/selectButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Empezar Ruta"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp" />
     </LinearLayout>
 
     <TextView
@@ -66,7 +51,9 @@
         android:textColor="#000000"
         android:text="Datos de la Farola:"
         android:textSize="18sp"
-        android:textStyle="normal" />
+        android:textStyle="normal"
+        android:layout_marginTop="16dp" />
+
     <!-- RecyclerView para mostrar datos -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_weather"
