@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "384756580893",
+    "project_id": "green-solutions-986e8",
+    "storage_bucket": "green-solutions-986e8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:384756580893:android:acc40061cc837f4a7afcf4",
+        "android_client_info": {
+          "package_name": "com.example.greensolutions"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "384756580893-db7p1p871d2f8bua7p8aasv24ths4f7g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.greensolutions",
+            "certificate_hash": "a34edbdde61be6116c148f3a6a2808bcf69abbfb"
+          }
+        },
+        {
+          "client_id": "384756580893-vvci5f6ton9cddcjal5vc621vk2j3sg0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.greensolutions",
+            "certificate_hash": "15ec178c2b01d56cd7636ec7e709b40b7015067d"
+          }
+        },
+        {
+          "client_id": "384756580893-c2e9n9ro25isfrhfg1c1fqahrhjj173c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBIIuzsJqS_64YtP0saON5gXMTU-PZPc08"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "384756580893-c2e9n9ro25isfrhfg1c1fqahrhjj173c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
