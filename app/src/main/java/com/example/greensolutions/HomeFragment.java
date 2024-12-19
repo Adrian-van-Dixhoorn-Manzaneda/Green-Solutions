@@ -1,5 +1,6 @@
 package com.example.greensolutions;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -33,32 +34,39 @@ public class HomeFragment extends Fragment {
     private ImageView imageView;
     private Spinner spinner;
     private Button actionButton;
-    private int[] imageResIds = {R.drawable.poste1, R.drawable.poste2, R.drawable.poste3};
+    private int[] imageResIds = {R.drawable.ruta1, R.drawable.ruta2, R.drawable.ruta3};
     private String[] imageOptions = {"Ruta_1", "luigi2", "luigi3"};
-    //private String[] imageOptions = new String[10];
     private boolean isImageFixed = false;
     private TextView welcomeTextView;
     private int selectedPosition = 0;
     private static final String TAG = "HomeFragment";
+
+
+    private FirebaseFirestore firestore;
+    private String userEmail;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
 
+
+        // Inicializa Firestore
+        firestore = FirebaseFirestore.getInstance();
+
+        // Recupera el email del usuario almacenado en SharedPreferences
+        if (getActivity() != null) {
+            userEmail = getActivity()
+                    .getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE)
+                    .getString("userEmail", null);
+        }
+
+
+
         // Inicialización de vistas
         spinner = rootView.findViewById(R.id.spinner);
         imageView = rootView.findViewById(R.id.imageView);
         actionButton = rootView.findViewById(R.id.selectButton);
-        welcomeTextView = rootView.findViewById(R.id.tv_welcome);
-
-        //updateImageOptionsWithRouteIds(imageOptions);
-        // Cargar nombre del usuario desde Firebase
-        loadUserNameFromFirebase();
-
-
-
-
 
         // Configuración del Spinner
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, imageOptions);
@@ -94,10 +102,10 @@ public class HomeFragment extends Fragment {
 
                         // Datos para RecyclerView
                         List<RutasData> rutasData = new ArrayList<>();
-                        rutasData.add(new RutasData("Emergencia", sensorResults.get(0).toString(), R.drawable.humidity));
-                        rutasData.add(new RutasData("Gas", sensorResults.get(1).toString(), R.drawable.precipitation));
-                        rutasData.add(new RutasData("Humedad", sensorResults.get(2).toString()+"km/h", R.drawable.wind));
-                        rutasData.add(new RutasData("Temperatura", sensorResults.get(3).toString()+"%", R.drawable.precipitation));
+                        rutasData.add(new RutasData("Emergencia", sensorResults.get(0).toString(), R.drawable.no_emergency));
+                        rutasData.add(new RutasData("Gas", sensorResults.get(1).toString(), R.drawable.gas));
+                        rutasData.add(new RutasData("Humedad", sensorResults.get(2).toString()+"%", R.drawable.humidity));
+                        rutasData.add(new RutasData("Temperatura", sensorResults.get(3).toString()+"ºC", R.drawable.temperatura));
 
                         RutasAdapter adapter2 = new RutasAdapter(rutasData);
                         recyclerView.setAdapter(adapter2);
@@ -115,38 +123,33 @@ public class HomeFragment extends Fragment {
         });
 
 
-
-
-
-
-
-
-
-
-
         // Manejo del botón
         actionButton.setOnClickListener(v -> {
             if (!isImageFixed) {
-                // Fija la imagen seleccionada y cambia el botón a "Quitar"
                 isImageFixed = true;
                 spinner.setEnabled(false);
                 actionButton.setText("Quitar");
 
-                // Redirigir al fragmento de Rutas
+                // Pass the selectedRouteId to FarolasFragment
                 Fragment farolasFragment = new FarolasFragment();
+                Bundle args = new Bundle();
+                args.putString("selectedRouteId", imageOptions[selectedPosition]); // Pass the selected ID
+                farolasFragment.setArguments(args);
+
                 getParentFragmentManager().beginTransaction()
                         .replace(R.id.framelayout, farolasFragment)
-                        .addToBackStack(null) // Opcional: para permitir volver atrás
+                        .addToBackStack(null) // Optional: allow back navigation
                         .commit();
             } else {
-                // Restaura el estado inicial
                 isImageFixed = false;
                 spinner.setEnabled(true);
                 actionButton.setText("Seleccionar");
-                spinner.setSelection(0); // Resetea el Spinner a la primera opción
-                imageView.setImageResource(R.drawable.ic_launcher_foreground); // Imagen por defecto
+                spinner.setSelection(0);
+                imageView.setImageResource(R.drawable.ic_launcher_foreground);
             }
         });
+
+
 
 
 
@@ -167,42 +170,6 @@ public class HomeFragment extends Fragment {
         Log.d(TAG, "No hay un usuario autenticado con Google");
         return null;
     }
-
-    /**
-     * Carga el nombre del usuario desde Firebase usando su UID.
-     */
-    private void loadUserNameFromFirebase() {
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-
-        if (firebaseAuth.getCurrentUser() != null) {
-            String userUID = firebaseAuth.getCurrentUser().getUid();
-            DatabaseReference databaseRef = FirebaseDatabase.getInstance()
-                    .getReference("usuarios").child(userUID);
-
-            // Asignar nombre predeterminado desde Google
-            String googleUserName = getGoogleUserName();
-            welcomeTextView.setText("Bienvenido, " + (googleUserName != null ? googleUserName : "Usuario Desconocido"));
-
-            // Consultar Firebase para el nombre del usuario
-            databaseRef.get().addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    DataSnapshot snapshot = task.getResult();
-                    if (snapshot != null && snapshot.child("nombre").exists()) {
-                        String userName = snapshot.child("nombre").getValue(String.class);
-                        if (userName != null) {
-                            welcomeTextView.setText("Bienvenido, " + userName);
-                        }
-                    }
-                } else {
-                    Log.e(TAG, "Error al consultar Firebase: " + task.getException().getMessage());
-                }
-            });
-        } else {
-            welcomeTextView.setText("Por favor, inicia sesión para continuar");
-        }
-    }
-
-
 
 
     private void updateImageOptionsWithRouteIds() {
@@ -265,10 +232,10 @@ public class HomeFragment extends Fragment {
                         int farolaCount = 0;
 
                         for (QueryDocumentSnapshot farolaDoc : task.getResult()) {
-                            Long emergencias = farolaDoc.getLong("Emergencias");
-                            Long gas = farolaDoc.getLong("Gas");
-                            Long humedad = farolaDoc.getLong("Humedad");
-                            Long temperatura = farolaDoc.getLong("Temperatura");
+                            Long emergencias = farolaDoc.getLong("emergencias");
+                            Long gas = farolaDoc.getLong("gas");
+                            Long humedad = farolaDoc.getLong("humedad");
+                            Long temperatura = farolaDoc.getLong("temperatura");
 
                             // Sumar valores (verifica nulos)
                             sensorResults.set(0, sensorResults.get(0) + (emergencias != null ? emergencias : 0)); // Emergencias
@@ -299,11 +266,6 @@ public class HomeFragment extends Fragment {
                     }
                 });
     }
-
-
-
-
-
 
 
 }

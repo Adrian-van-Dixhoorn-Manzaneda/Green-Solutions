@@ -1,7 +1,21 @@
 <resources>
-    <string name="app_name">Green Solutions</string>
+    <string name="app_name">Smart Nature</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="default_web_client_id">384756580893-vvci5f6ton9cddcjal5vc621vk2j3sg0.apps.googleusercontent.com</string>
+
+    <string-array name="spinner_options">
+        <item>Farola_1</item>
+        <item>Farola_2</item>
+        <item>Farola_3</item>
+    </string-array>
+
+    <string name="foto">Foto</string>
+    <string name="galeria">Galería</string>
+    <string name="publicar">Publicar</string>
+    <string name="spinner_dropdown_desc">Lista desplegable</string>
+    <string name="foto_seleccionada_desc">Foto seleccionada</string>
+    <string name="icono_camara_desc">Icono cámara de fotos</string>
+    <string name="icono_galeria_desc">Icono galería</string>
 
 </resources>

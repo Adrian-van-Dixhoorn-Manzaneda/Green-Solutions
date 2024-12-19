@@ -28,12 +28,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // Inicializar Firebase
+        /**
         FirebaseApp.initializeApp(this);
         firebaseAuth = FirebaseAuth.getInstance();
 
         // Verificar si el usuario ha iniciado sesión
         checkUserSession();
-
+         **/
         setContentView(R.layout.activity_main);
         frameLayout = findViewById(R.id.framelayout);
         toolbar = findViewById(R.id.toolbar);

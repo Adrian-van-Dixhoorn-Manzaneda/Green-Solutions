@@ -1,6 +1,8 @@
 package com.example.greensolutions;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,157 +10,254 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
+
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class FarolasFragment extends Fragment {
 
-    private ImageView imageView;
-    private Spinner spinner;
+    private ViewPager2 galleryViewPager;
+    private TabLayout galleryIndicator; // Nuevo indicador de puntos
+    private Spinner farolaSpinner;
     private Button actionButton;
-    private int[] imageResIds = {R.drawable.poste1, R.drawable.poste2, R.drawable.poste3};
-    private String[] imageOptions = {"Farola Central", "Farola del Norte", "Farola del Sur"};
-    private boolean isImageFixed = false;
-    private int selectedPosition = 0;
-    private TextView welcomeTextView;
+    private List<String> farolaIds = new ArrayList<>();
+    private List<List<Integer>> farolaImages = new ArrayList<>();
+    private String routeId = null;
+    private static final String TAG = "FarolasFragment";
 
-    private static final String TAG = "HomeFragment";
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private Runnable sensorRefreshTask;
+    private final long refreshInterval = 5000;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_home, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_farolas, container, false);
 
-        // Inicialización de vistas
-        spinner = rootView.findViewById(R.id.spinner);
-        imageView = rootView.findViewById(R.id.imageView);
+        // Recibir el routeId
+        Bundle args = getArguments();
+        if (args != null) {
+            routeId = args.getString("selectedRouteId");
+            Log.i(TAG, "Ruta recibida: " + routeId);
+        } else {
+            Log.e(TAG, "No se recibió un routeId.");
+        }
+
+        // Inicializar vistas
+        galleryViewPager = rootView.findViewById(R.id.galleryViewPager);
+        galleryIndicator = rootView.findViewById(R.id.galleryIndicator); // Inicializar el TabLayout
+        farolaSpinner = rootView.findViewById(R.id.farolaSpinner);
         actionButton = rootView.findViewById(R.id.selectButton);
-        welcomeTextView = rootView.findViewById(R.id.tv_welcome);
-
-        // Cargar nombre del usuario desde Firebase
-        loadUserNameFromFirebase();
 
         RecyclerView recyclerView = rootView.findViewById(R.id.recycler_weather);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Datos para RecyclerView
-        List<WeatherData> weatherData = new ArrayList<>();
-        weatherData.add(new WeatherData("Emergencia", "1", R.drawable.humidity));
-        weatherData.add(new WeatherData("Gas", "0", R.drawable.precipitation));
-        weatherData.add(new WeatherData("Humedad", "15%", R.drawable.wind));
-        weatherData.add(new WeatherData("Temperatura", "10 ºC", R.drawable.precipitation));
+        // Cargar IDs de farolas y configurar la UI
+        updateFarolaIds(() -> {
+            // Configurar Spinner con los IDs de farolas
+            ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, farolaIds);
+            spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            farolaSpinner.setAdapter(spinnerAdapter);
 
-        WeatherAdapter adapter2 = new WeatherAdapter(weatherData);
-        recyclerView.setAdapter(adapter2);
+            // Configurar listener para el Spinner
+            farolaSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    stopFetchingFarolaSensorValues();
 
-        // Configuración del Spinner
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, imageOptions);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
+                    // Actualizar ViewPager2 con imágenes de la farola seleccionada
+                    GalleryAdapter galleryAdapter = new GalleryAdapter(getContext(), farolaImages.get(position));
+                    galleryViewPager.setAdapter(galleryAdapter);
 
-        // Manejo de selección en el Spinner
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (!isImageFixed) {
-                    imageView.setImageResource(imageResIds[position]);
-                    selectedPosition = position;
+                    // Conectar el TabLayout al ViewPager2
+                    new TabLayoutMediator(galleryIndicator, galleryViewPager,
+                            (tab, tabPosition) -> {
+                                tab.setIcon(R.drawable.galleryicon);
+                            }).attach();
+
+                    // Obtener datos de sensores para la farola seleccionada
+                    String selectedFarolaId = farolaIds.get(position);
+                    startFetchingFarolaSensorValues(routeId, selectedFarolaId, sensorResults -> {
+                        List<WeatherData> weatherData = new ArrayList<>();
+                        weatherData.add(new WeatherData("Emergencia", sensorResults.get(0).toString(), R.drawable.no_emergency));
+                        weatherData.add(new WeatherData("Gas", sensorResults.get(1).toString(), R.drawable.gas));
+                        weatherData.add(new WeatherData("Humedad", sensorResults.get(2).toString() + "%", R.drawable.humidity));
+                        weatherData.add(new WeatherData("Temperatura", sensorResults.get(3).toString() + " ºC", R.drawable.temperatura));
+                        WeatherAdapter adapter2 = new WeatherAdapter(weatherData);
+                        recyclerView.setAdapter(adapter2);
+                    });
                 }
-            }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+                    // No hacer nada si no hay selección
+                }
+            });
         });
 
-        // Manejo del botón
+        // Configurar botón
+        actionButton.setText("Terminar Ruta");
         actionButton.setOnClickListener(v -> {
-            if (!isImageFixed) {
-                // Fija la imagen seleccionada y cambia el botón a "Quitar"
-                isImageFixed = true;
-                spinner.setEnabled(false);
-                actionButton.setText("Quitar");
-
-            } else {
-                // Restaura el estado inicial
-                isImageFixed = false;
-                spinner.setEnabled(true);
-                actionButton.setText("Seleccionar");
-                spinner.setSelection(0); // Resetea el Spinner a la primera opción
-                imageView.setImageResource(R.drawable.ic_launcher_foreground); // Imagen por defecto
-            }
+            Fragment rutasFragment = new HomeFragment();
+            getParentFragmentManager().beginTransaction()
+                    .replace(R.id.framelayout, rutasFragment)
+                    .addToBackStack(null)
+                    .commit();
         });
 
         return rootView;
     }
 
-
     /**
-     * Obtiene el nombre del usuario autenticado con Google usando FirebaseAuth.
-     * @return El nombre del usuario autenticado con Google, o null si no está disponible.
+     * Actualizar IDs de farolas y cargar imágenes dummy.
      */
-    private String getGoogleUserName() {
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-        if (firebaseAuth.getCurrentUser() != null) {
-            Log.d(TAG, "Usuario autenticado con Google: " + firebaseAuth.getCurrentUser().getDisplayName());
-            return firebaseAuth.getCurrentUser().getDisplayName(); // Nombre del usuario de Google
+    private void updateFarolaIds(Runnable onFarolasUpdated) {
+        if (routeId == null) {
+            Log.e(TAG, "Route ID is null. Cannot fetch Farola IDs.");
+            return;
         }
-        Log.d(TAG, "No hay un usuario autenticado con Google");
-        return null;
-    }
 
-    /**
-     * Carga el nombre del usuario desde Firebase usando su UID.
-     */
-    private void loadUserNameFromFirebase() {
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        db.collection("Rutas")
+                .document(routeId)
+                .collection("Farolas")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        QuerySnapshot querySnapshot = task.getResult();
+                        if (querySnapshot != null) {
+                            farolaIds.clear();
+                            farolaImages.clear();
+                            for (DocumentSnapshot farolaDoc : querySnapshot.getDocuments()) {
+                                String farolaId = farolaDoc.getId();
+                                farolaIds.add(farolaId);
 
-        if (firebaseAuth.getCurrentUser() != null) {
-            String userUID = firebaseAuth.getCurrentUser().getUid();
-            DatabaseReference databaseRef = FirebaseDatabase.getInstance()
-                    .getReference("usuarios").child(userUID);
+                                // Configuraciones personalizadas por ruta y farola
+                                List<Integer> imagesForFarola = new ArrayList<>();
+                                switch (routeId) {
+                                    case "Ruta_1":
+                                        if (farolaId.equals("Farola_1")) {
+                                            imagesForFarola = Arrays.asList(R.drawable.ruta1v1, R.drawable.parque1, R.drawable.parque2);
+                                        } else if (farolaId.equals("Farola_2")) {
+                                            imagesForFarola = Arrays.asList(R.drawable.ruta1v2, R.drawable.parque3, R.drawable.parque4);
+                                        } else {
+                                            imagesForFarola = Arrays.asList(R.drawable.ruta1v3, R.drawable.parque1, R.drawable.parque2);
+                                        }
+                                        break;
+                                    case "Ruta_2":
+                                        if (farolaId.equals("Farola_1")) {
+                                            imagesForFarola = Arrays.asList(R.drawable.ruta2v1, R.drawable.parque1, R.drawable.parque2);
+                                        } else if (farolaId.equals("Farola_2")) {
+                                            imagesForFarola = Arrays.asList(R.drawable.ruta2v2, R.drawable.parque3, R.drawable.parque4);
+                                        } else {
+                                            imagesForFarola = Arrays.asList(R.drawable.ruta2v3, R.drawable.parque1, R.drawable.parque2);
+                                        }
+                                        break;
+                                    case "Ruta_3":
+                                        if (farolaId.equals("Farola_1")) {
+                                            imagesForFarola = Arrays.asList(R.drawable.ruta2v1, R.drawable.parque1, R.drawable.parque2);
+                                        } else if (farolaId.equals("Farola_2")) {
+                                            imagesForFarola = Arrays.asList(R.drawable.ruta2v2, R.drawable.parque3, R.drawable.parque4);
+                                        } else {
+                                            imagesForFarola = Arrays.asList(R.drawable.ruta2v3, R.drawable.parque1, R.drawable.parque2);
+                                        }
+                                        break;
+                                    default:
+                                        imagesForFarola = Arrays.asList(R.drawable.ruta1v1);
+                                        break;
+                                }
+                                farolaImages.add(imagesForFarola);
+                            }
 
-            // Asignar nombre predeterminado desde Google
-            String googleUserName = getGoogleUserName();
-            welcomeTextView.setText("Bienvenido, " + (googleUserName != null ? googleUserName : "Usuario Desconocido"));
-
-            // Consultar Firebase para el nombre del usuario
-            databaseRef.get().addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    DataSnapshot snapshot = task.getResult();
-                    if (snapshot != null && snapshot.child("nombre").exists()) {
-                        String userName = snapshot.child("nombre").getValue(String.class);
-                        if (userName != null) {
-                            welcomeTextView.setText("Bienvenido, " + userName);
+                            Log.i(TAG, "Farola IDs actualizados: " + farolaIds);
+                            onFarolasUpdated.run();
                         }
+                    } else {
+                        Log.w(TAG, "Error al obtener IDs de farolas", task.getException());
                     }
-                } else {
-                    Log.e(TAG, "Error al consultar Firebase: " + task.getException().getMessage());
-                }
-            });
-        } else {
-            welcomeTextView.setText("Por favor, inicia sesión para continuar");
-        }
+                });
     }
 
 
-}
+    /**
+     * Obtener datos de sensores para una farola específica y refrescarlos periódicamente.
+     */
+    public void startFetchingFarolaSensorValues(String routeId, String farolaId, SensorDataCallback callback) {
+        if (routeId == null || farolaId == null) {
+            Log.e(TAG, "Route ID o Farola ID es null. No se pueden obtener datos de sensores.");
+            return;
+        }
 
+        // Definir la tarea de actualización periódica
+        sensorRefreshTask = new Runnable() {
+            @Override
+            public void run() {
+                db.collection("Rutas")
+                        .document(routeId)
+                        .collection("Farolas")
+                        .document(farolaId)
+                        .get()
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful() && task.getResult() != null) {
+                                DocumentSnapshot farolaDoc = task.getResult();
+                                List<Object> sensorResults = new ArrayList<>(Arrays.asList(
+                                        farolaDoc.getLong("emergencias") != null ? farolaDoc.getLong("emergencias") : 0,
+                                        farolaDoc.getLong("gas") != null ? farolaDoc.getLong("gas") : 0,
+                                        farolaDoc.getLong("humedad") != null ? farolaDoc.getLong("humedad") : 0,
+                                        farolaDoc.getDouble("temperatura") != null ? farolaDoc.getDouble("temperatura") : 0.0
+                                ));
+
+                                Log.i(TAG, "Datos de sensores obtenidos para Farola " + farolaId + ": " + sensorResults);
+                                callback.onSensorDataReady(sensorResults);
+                            } else {
+                                Log.w(TAG, "Error al obtener datos de sensores para Farola " + farolaId, task.getException());
+                            }
+                        });
+
+                // Programar la siguiente ejecución después de 5 segundos
+                handler.postDelayed(this, refreshInterval);
+            }
+        };
+
+        // Iniciar la tarea periódica
+        handler.post(sensorRefreshTask);
+    }
+
+    /**
+     * Detener la actualización periódica de los valores de sensores.
+     */
+    public void stopFetchingFarolaSensorValues() {
+        if (sensorRefreshTask != null) {
+            handler.removeCallbacks(sensorRefreshTask);
+            sensorRefreshTask = null;
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        stopFetchingFarolaSensorValues();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        stopFetchingFarolaSensorValues();
+    }
+
+    public interface SensorDataCallback {
+        void onSensorDataReady(List<Object> sensorResults);
+    }
+}
