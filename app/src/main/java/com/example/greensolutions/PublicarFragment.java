@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
@@ -120,12 +121,15 @@ public class PublicarFragment extends Fragment {
 
     // Aquí hay que poner el fragment de la galeria de fotos publicadas
     public void publicarFoto(View view) {
+        TextView notificacion = getView().findViewById(R.id.notificacion); // Obtén el TextView de notificación
         if (uriUltimaFoto != null) {
-            Intent intent = new Intent(requireContext(), PublicarFragment.class);
-            intent.putExtra("fotoUri", uriUltimaFoto.toString());
-            startActivity(intent);
+            // Mostrar el mensaje de notificación
+            notificacion.setVisibility(View.VISIBLE);
+            notificacion.setText("Foto publicada con éxito");
         } else {
+            // Mostrar un aviso si no hay foto seleccionada
             Toast.makeText(requireContext(), "No se ha seleccionado una foto", Toast.LENGTH_LONG).show();
         }
     }
+
 }
