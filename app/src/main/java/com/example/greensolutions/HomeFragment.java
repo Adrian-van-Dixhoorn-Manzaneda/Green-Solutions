@@ -62,16 +62,22 @@ public class HomeFragment extends Fragment {
         }
 
         // Verifica y carga el nombre del usuario
+        /**
         if (userEmail != null) {
             loadUserNameFromFirebase();
         } else {
             Log.e(TAG, "Correo del usuario no encontrado en SharedPreferences");
         }
+         **/
 
         // Inicialización de vistas
         spinner = rootView.findViewById(R.id.spinner);
         imageView = rootView.findViewById(R.id.imageView);
         actionButton = rootView.findViewById(R.id.selectButton);
+<<<<<<< HEAD
+=======
+        //welcomeTextView = rootView.findViewById(R.id.tv_welcome);
+>>>>>>> ebf2178df0c5669174247b1e97093780526dc6be
 
 
         // Configuración del Spinner
@@ -180,6 +186,8 @@ public class HomeFragment extends Fragment {
     /**
      * Carga el nombre del usuario desde Firebase usando su UID.
      */
+
+    /**
     private void loadUserNameFromFirebase() {
         // Accede a la colección "usuarios" y busca por el campo "email"
         firestore.collection("usuarios")
@@ -207,7 +215,7 @@ public class HomeFragment extends Fragment {
                 });
     }
 
-
+    **/
 
 
     private void updateImageOptionsWithRouteIds() {
@@ -304,11 +312,6 @@ public class HomeFragment extends Fragment {
                     }
                 });
     }
-
-
-
-
-
 
 
 }

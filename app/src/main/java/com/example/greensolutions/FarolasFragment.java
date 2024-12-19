@@ -1,6 +1,8 @@
 package com.example.greensolutions;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +15,6 @@ import android.widget.Spinner;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -33,6 +34,11 @@ public class FarolasFragment extends Fragment {
     private List<List<Integer>> farolaImages = new ArrayList<>();
     private String routeId = null;
     private static final String TAG = "FarolasFragment";
+
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private Runnable sensorRefreshTask;
+    private final long refreshInterval = 5000;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -67,19 +73,32 @@ public class FarolasFragment extends Fragment {
             farolaSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    // Detener las actualizaciones periódicas anteriores, si existen
+                    stopFetchingFarolaSensorValues();
+
                     // Actualizar ViewPager2 con imágenes de la farola seleccionada
                     GalleryAdapter galleryAdapter = new GalleryAdapter(getContext(), farolaImages.get(position));
                     galleryViewPager.setAdapter(galleryAdapter);
 
                     // Obtener datos de sensores para la farola seleccionada
                     String selectedFarolaId = farolaIds.get(position);
-                    getFarolaSensorValues(selectedFarolaId, sensorResults -> {
+                    startFetchingFarolaSensorValues(routeId, selectedFarolaId, sensorResults -> {
                         // Actualizar RecyclerView con datos de sensores
                         List<WeatherData> weatherData = new ArrayList<>();
+<<<<<<< HEAD
                         weatherData.add(new WeatherData("Emergencia", sensorResults.get(0).toString(), R.drawable.no_emergency));
                         weatherData.add(new WeatherData("Gas", sensorResults.get(1).toString(), R.drawable.gas));
                         weatherData.add(new WeatherData("Humedad", sensorResults.get(2).toString() + "%", R.drawable.humidity));
                         weatherData.add(new WeatherData("Temperatura", sensorResults.get(3).toString() + " ºC", R.drawable.temperatura));
+=======
+                        weatherData.add(new WeatherData("Emergencia", sensorResults.get(0).toString(), R.drawable.humidity));
+                        weatherData.add(new WeatherData("Gas", sensorResults.get(1).toString(), R.drawable.precipitation));
+                        weatherData.add(new WeatherData("Humedad", sensorResults.get(2).toString() + "%", R.drawable.wind));
+
+                        // Formatear temperatura como decimal
+                        Double temperatura = (Double) sensorResults.get(3);
+                        weatherData.add(new WeatherData("Temperatura", String.format("%.1f ºC", temperatura), R.drawable.precipitation));
+>>>>>>> ebf2178df0c5669174247b1e97093780526dc6be
 
                         WeatherAdapter adapter2 = new WeatherAdapter(weatherData);
                         recyclerView.setAdapter(adapter2);
@@ -88,6 +107,7 @@ public class FarolasFragment extends Fragment {
 
                 @Override
                 public void onNothingSelected(AdapterView<?> parent) {
+                    // No hacer nada si no hay selección
                 }
             });
         });
@@ -115,7 +135,6 @@ public class FarolasFragment extends Fragment {
             return;
         }
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection("Rutas")
                 .document(routeId)
                 .collection("Farolas")
@@ -132,41 +151,15 @@ public class FarolasFragment extends Fragment {
                                 // Personalizando Galería por rutas y farolas
                                 switch (routeId) {
                                     case "Ruta_1":
-                                        if (farolaDoc.getId().equals("Farola_1")) {
-                                            farolaImages.add(Arrays.asList(R.drawable.ruta1v1, R.drawable.parque1, R.drawable.parque2));
-                                        } else if (farolaDoc.getId().equals("Farola_2")) {
-                                            farolaImages.add(Arrays.asList(R.drawable.ruta1v2, R.drawable.parque3, R.drawable.parque4));
-                                        } else {
-                                            farolaImages.add(Arrays.asList(R.drawable.ruta1v3, R.drawable.parque1, R.drawable.parque2));
-                                        }
+                                        farolaImages.add(Arrays.asList(R.drawable.ruta1v1, R.drawable.parque1, R.drawable.parque2));
                                         break;
-
                                     case "Ruta_2":
-                                        if (farolaDoc.getId().equals("Farola_1")) {
-                                            farolaImages.add(Arrays.asList(R.drawable.ruta2v1, R.drawable.parque1, R.drawable.parque2));
-                                        } else if (farolaDoc.getId().equals("Farola_2")) {
-                                            farolaImages.add(Arrays.asList(R.drawable.ruta2v2, R.drawable.parque3, R.drawable.parque4));
-                                        } else {
-                                            farolaImages.add(Arrays.asList(R.drawable.ruta2v3, R.drawable.parque1, R.drawable.parque2));
-                                        }
+                                        farolaImages.add(Arrays.asList(R.drawable.ruta2v1, R.drawable.parque3, R.drawable.parque4));
                                         break;
-
-                                    case "Ruta_3":
-                                        if (farolaDoc.getId().equals("Farola_1")) {
-                                            farolaImages.add(Arrays.asList(R.drawable.ruta3v1, R.drawable.parque1, R.drawable.parque2));
-                                        } else if (farolaDoc.getId().equals("Farola_2")) {
-                                            farolaImages.add(Arrays.asList(R.drawable.ruta3v2, R.drawable.parque3, R.drawable.parque4));
-                                        } else {
-                                            farolaImages.add(Arrays.asList(R.drawable.ruta3v3, R.drawable.parque1, R.drawable.parque2));
-                                        }
-                                        break;
-
                                     default:
-                                        Log.w(TAG, "Route ID no reconocido: " + routeId);
-                                        farolaImages.add(Arrays.asList(R.drawable.ruta1));
+                                        farolaImages.add(Arrays.asList(R.drawable.ruta1v1));
                                         break;
                                 }
-
                             }
 
                             Log.i(TAG, "Farola IDs actualizados: " + farolaIds);
@@ -179,39 +172,72 @@ public class FarolasFragment extends Fragment {
     }
 
     /**
-     * Obtener datos de sensores para una farola específica.
+     * Obtener datos de sensores para una farola específica y refrescarlos periódicamente.
      */
-    private void getFarolaSensorValues(String farolaId, SensorDataCallback callback) {
+    public void startFetchingFarolaSensorValues(String routeId, String farolaId, SensorDataCallback callback) {
         if (routeId == null || farolaId == null) {
             Log.e(TAG, "Route ID o Farola ID es null. No se pueden obtener datos de sensores.");
             return;
         }
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("Rutas")
-                .document(routeId)
-                .collection("Farolas")
-                .document(farolaId)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && task.getResult() != null) {
-                        DocumentSnapshot farolaDoc = task.getResult();
-                        List<Long> sensorResults = new ArrayList<>(Arrays.asList(
-                                farolaDoc.getLong("Emergencias") != null ? farolaDoc.getLong("Emergencias") : 0,
-                                farolaDoc.getLong("Gas") != null ? farolaDoc.getLong("Gas") : 0,
-                                farolaDoc.getLong("Humedad") != null ? farolaDoc.getLong("Humedad") : 0,
-                                farolaDoc.getLong("Temperatura") != null ? farolaDoc.getLong("Temperatura") : 0
-                        ));
+        // Definir la tarea de actualización periódica
+        sensorRefreshTask = new Runnable() {
+            @Override
+            public void run() {
+                db.collection("Rutas")
+                        .document(routeId)
+                        .collection("Farolas")
+                        .document(farolaId)
+                        .get()
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful() && task.getResult() != null) {
+                                DocumentSnapshot farolaDoc = task.getResult();
+                                List<Object> sensorResults = new ArrayList<>(Arrays.asList(
+                                        farolaDoc.getLong("emergencias") != null ? farolaDoc.getLong("emergencias") : 0,
+                                        farolaDoc.getLong("gas") != null ? farolaDoc.getLong("gas") : 0,
+                                        farolaDoc.getLong("humedad") != null ? farolaDoc.getLong("humedad") : 0,
+                                        farolaDoc.getDouble("temperatura") != null ? farolaDoc.getDouble("temperatura") : 0.0
+                                ));
 
-                        Log.i(TAG, "Datos de sensores obtenidos para Farola " + farolaId + ": " + sensorResults);
-                        callback.onSensorDataReady(sensorResults);
-                    } else {
-                        Log.w(TAG, "Error al obtener datos de sensores para Farola " + farolaId, task.getException());
-                    }
-                });
+                                Log.i(TAG, "Datos de sensores obtenidos para Farola " + farolaId + ": " + sensorResults);
+                                callback.onSensorDataReady(sensorResults);
+                            } else {
+                                Log.w(TAG, "Error al obtener datos de sensores para Farola " + farolaId, task.getException());
+                            }
+                        });
+
+                // Programar la siguiente ejecución después de 5 segundos
+                handler.postDelayed(this, refreshInterval);
+            }
+        };
+
+        // Iniciar la tarea periódica
+        handler.post(sensorRefreshTask);
+    }
+
+    /**
+     * Detener la actualización periódica de los valores de sensores.
+     */
+    public void stopFetchingFarolaSensorValues() {
+        if (sensorRefreshTask != null) {
+            handler.removeCallbacks(sensorRefreshTask);
+            sensorRefreshTask = null;
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        stopFetchingFarolaSensorValues();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        stopFetchingFarolaSensorValues();
     }
 
     public interface SensorDataCallback {
-        void onSensorDataReady(List<Long> sensorResults);
+        void onSensorDataReady(List<Object> sensorResults);
     }
 }
