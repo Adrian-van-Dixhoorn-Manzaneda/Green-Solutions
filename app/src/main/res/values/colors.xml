@@ -3,4 +3,8 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="unselected_menu">#cccccc</color>
+    <color name="blue">#3c91e6</color>
+    <color name="gris">#f4f4f4</color>
+
+
 </resources>

@@ -72,7 +72,6 @@ public class HomeFragment extends Fragment {
         spinner = rootView.findViewById(R.id.spinner);
         imageView = rootView.findViewById(R.id.imageView);
         actionButton = rootView.findViewById(R.id.selectButton);
-        welcomeTextView = rootView.findViewById(R.id.tv_welcome);
 
 
         // Configuración del Spinner
@@ -109,10 +108,10 @@ public class HomeFragment extends Fragment {
 
                         // Datos para RecyclerView
                         List<RutasData> rutasData = new ArrayList<>();
-                        rutasData.add(new RutasData("Emergencia", sensorResults.get(0).toString(), R.drawable.humidity));
-                        rutasData.add(new RutasData("Gas", sensorResults.get(1).toString(), R.drawable.precipitation));
-                        rutasData.add(new RutasData("Humedad", sensorResults.get(2).toString()+"km/h", R.drawable.wind));
-                        rutasData.add(new RutasData("Temperatura", sensorResults.get(3).toString()+"%", R.drawable.precipitation));
+                        rutasData.add(new RutasData("Emergencia", sensorResults.get(0).toString(), R.drawable.no_emergency));
+                        rutasData.add(new RutasData("Gas", sensorResults.get(1).toString(), R.drawable.gas));
+                        rutasData.add(new RutasData("Humedad", sensorResults.get(2).toString()+"km/h", R.drawable.humidity));
+                        rutasData.add(new RutasData("Temperatura", sensorResults.get(3).toString()+"%", R.drawable.temperatura));
 
                         RutasAdapter adapter2 = new RutasAdapter(rutasData);
                         recyclerView.setAdapter(adapter2);

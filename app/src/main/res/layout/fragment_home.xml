@@ -2,24 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/gris">
 
-    <!-- Título de Bienvenida con imagen de fondo -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:gravity="center"
-        android:background="@drawable/homebackgound"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/tv_welcome"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-    </LinearLayout>
 
     <!-- Contenedor de galería -->
     <LinearLayout
@@ -38,15 +23,31 @@
                 android:id="@+id/spinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
+                android:layout_marginLeft="5dp"
                 android:layout_weight="1"
-                android:minHeight="48dp" />
+                android:background="@drawable/spinner_background"
+                android:minHeight="48dp"
+                android:popupBackground="@color/white"
+                android:spinnerMode="dropdown" />
 
+
+
+            <!-- boton de empezar ruta -->
             <Button
                 android:id="@+id/selectButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Empezar Ruta" />
+                android:layout_margin="8dp"
+                android:background="@drawable/boton_background"
+                android:fontFamily="@font/comfortaa"
+                android:gravity="center"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
+                android:text="Empezar Ruta"
+                android:textColor="@android:color/white"
+                android:textSize="12dp"
+                android:textStyle="bold" />
+
         </LinearLayout>
 
         <!-- Imagen debajo del spinner y botón -->
@@ -66,7 +67,9 @@
         android:textColor="#000000"
         android:text="Datos de la Ruta:"
         android:textSize="18sp"
-        android:textStyle="normal" />
+        android:textStyle="normal"
+        android:layout_marginLeft="10dp"
+        android:fontFamily="@font/comfortaa"/>
     <!-- RecyclerView para mostrar datos -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_weather"
@@ -74,7 +77,11 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:padding="8dp"
+        android:layout_marginTop="5dp"
         android:clipToPadding="false"
-        android:scrollbars="vertical" />
+        android:scrollbars="vertical"
+        android:fontFamily="@font/comfortaa"/>
+
+
 
 </LinearLayout>

@@ -16,5 +16,7 @@
         android:text="Somos una empresa dedicada a la innovación tecnológica en parques. Diseñamos bastones con sensores que mejoran la experiencia de los visitantes al detectar cambios en el entorno y proporcionar información útil en tiempo real."
         android:textSize="14sp"
         android:textColor="@android:color/black"
-        android:gravity="center" />
+        android:gravity="center"
+        android:fontFamily="@font/comfortaa"
+        />
 </LinearLayout>

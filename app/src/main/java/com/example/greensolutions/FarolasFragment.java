@@ -76,10 +76,10 @@ public class FarolasFragment extends Fragment {
                     getFarolaSensorValues(selectedFarolaId, sensorResults -> {
                         // Actualizar RecyclerView con datos de sensores
                         List<WeatherData> weatherData = new ArrayList<>();
-                        weatherData.add(new WeatherData("Emergencia", sensorResults.get(0).toString(), R.drawable.humidity));
-                        weatherData.add(new WeatherData("Gas", sensorResults.get(1).toString(), R.drawable.precipitation));
-                        weatherData.add(new WeatherData("Humedad", sensorResults.get(2).toString() + "%", R.drawable.wind));
-                        weatherData.add(new WeatherData("Temperatura", sensorResults.get(3).toString() + " ºC", R.drawable.precipitation));
+                        weatherData.add(new WeatherData("Emergencia", sensorResults.get(0).toString(), R.drawable.no_emergency));
+                        weatherData.add(new WeatherData("Gas", sensorResults.get(1).toString(), R.drawable.gas));
+                        weatherData.add(new WeatherData("Humedad", sensorResults.get(2).toString() + "%", R.drawable.humidity));
+                        weatherData.add(new WeatherData("Temperatura", sensorResults.get(3).toString() + " ºC", R.drawable.temperatura));
 
                         WeatherAdapter adapter2 = new WeatherAdapter(weatherData);
                         recyclerView.setAdapter(adapter2);
