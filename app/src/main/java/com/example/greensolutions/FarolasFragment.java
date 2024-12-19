@@ -85,10 +85,20 @@ public class FarolasFragment extends Fragment {
                     startFetchingFarolaSensorValues(routeId, selectedFarolaId, sensorResults -> {
                         // Actualizar RecyclerView con datos de sensores
                         List<WeatherData> weatherData = new ArrayList<>();
+<<<<<<< HEAD
+                        weatherData.add(new WeatherData("Emergencia", sensorResults.get(0).toString(), R.drawable.no_emergency));
+                        weatherData.add(new WeatherData("Gas", sensorResults.get(1).toString(), R.drawable.gas));
+                        weatherData.add(new WeatherData("Humedad", sensorResults.get(2).toString() + "%", R.drawable.humidity));
+                        weatherData.add(new WeatherData("Temperatura", sensorResults.get(3).toString() + " ºC", R.drawable.temperatura));
+=======
                         weatherData.add(new WeatherData("Emergencia", sensorResults.get(0).toString(), R.drawable.humidity));
                         weatherData.add(new WeatherData("Gas", sensorResults.get(1).toString(), R.drawable.precipitation));
                         weatherData.add(new WeatherData("Humedad", sensorResults.get(2).toString() + "%", R.drawable.wind));
-                        weatherData.add(new WeatherData("Temperatura", sensorResults.get(3).toString() + " ºC", R.drawable.precipitation));
+
+                        // Formatear temperatura como decimal
+                        Double temperatura = (Double) sensorResults.get(3);
+                        weatherData.add(new WeatherData("Temperatura", String.format("%.1f ºC", temperatura), R.drawable.precipitation));
+>>>>>>> ebf2178df0c5669174247b1e97093780526dc6be
 
                         WeatherAdapter adapter2 = new WeatherAdapter(weatherData);
                         recyclerView.setAdapter(adapter2);
@@ -182,11 +192,11 @@ public class FarolasFragment extends Fragment {
                         .addOnCompleteListener(task -> {
                             if (task.isSuccessful() && task.getResult() != null) {
                                 DocumentSnapshot farolaDoc = task.getResult();
-                                List<Long> sensorResults = new ArrayList<>(Arrays.asList(
+                                List<Object> sensorResults = new ArrayList<>(Arrays.asList(
                                         farolaDoc.getLong("emergencias") != null ? farolaDoc.getLong("emergencias") : 0,
                                         farolaDoc.getLong("gas") != null ? farolaDoc.getLong("gas") : 0,
                                         farolaDoc.getLong("humedad") != null ? farolaDoc.getLong("humedad") : 0,
-                                        farolaDoc.getLong("temperatura") != null ? farolaDoc.getLong("temperatura") : 0
+                                        farolaDoc.getDouble("temperatura") != null ? farolaDoc.getDouble("temperatura") : 0.0
                                 ));
 
                                 Log.i(TAG, "Datos de sensores obtenidos para Farola " + farolaId + ": " + sensorResults);
@@ -228,6 +238,6 @@ public class FarolasFragment extends Fragment {
     }
 
     public interface SensorDataCallback {
-        void onSensorDataReady(List<Long> sensorResults);
+        void onSensorDataReady(List<Object> sensorResults);
     }
 }

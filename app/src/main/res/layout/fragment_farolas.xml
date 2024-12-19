@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/gris">
 
     <!-- Contenedor de galería y selector de farolas -->
     <LinearLayout
@@ -31,8 +32,16 @@
                 android:id="@+id/selectButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:background="@drawable/boton_background"
+                android:fontFamily="@font/comfortaa"
+                android:gravity="center"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
                 android:text="Empezar Ruta"
-                />
+                android:textColor="@android:color/white"
+                android:textSize="12dp"
+                android:textStyle="bold" />
 
         </LinearLayout>
 
@@ -59,7 +68,10 @@
         android:textStyle="normal"
         android:layout_marginTop="16dp"
         android:paddingStart="8dp"
-        android:paddingEnd="8dp" />
+        android:paddingEnd="8dp"
+        android:textAlignment="center"
+        android:layout_marginLeft="10dp"
+        android:fontFamily="@font/comfortaa"/>
 
     <!-- RecyclerView para mostrar datos -->
     <androidx.recyclerview.widget.RecyclerView

@@ -1,0 +1,21 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Fondo del botón -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#3c91e6" /> <!-- Color azul del botón -->
+            <corners android:radius="12dp" />  <!-- Bordes redondeados -->
+        </shape>
+    </item>
+
+    <!-- Borde del botón -->
+    <item android:left="0dp" android:right="0dp" android:top="0dp" android:bottom="0dp">
+        <shape android:shape="rectangle">
+            <stroke
+                android:width="2dp"
+                android:color="#FFFFFF" /> <!-- Color blanco del borde -->
+            <corners android:radius="10dp" /> <!-- Bordes redondeados -->
+        </shape>
+    </item>
+
+</layer-list>
