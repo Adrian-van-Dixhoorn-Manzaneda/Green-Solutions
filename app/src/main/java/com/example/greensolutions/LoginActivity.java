@@ -100,6 +100,7 @@ public class LoginActivity extends AppCompatActivity {
                             if (password.equals(storedPassword)) {
                                 getSharedPreferences("LoginPrefs", MODE_PRIVATE)
                                         .edit()
+                                        .putBoolean("isGoogleSignIn", false)
                                         .putString("userEmail", email)
                                         .apply();
 
@@ -144,6 +145,14 @@ public class LoginActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
                         Toast.makeText(LoginActivity.this, "Welcome, " + user.getEmail(), Toast.LENGTH_SHORT).show();
+
+                        // Guardar el indicador de inicio de sesión por Google
+                        getSharedPreferences("LoginPrefs", MODE_PRIVATE)
+                                .edit()
+                                .putString("userEmail", user.getEmail())
+                                .putBoolean("isGoogleSignIn", true)
+                                .apply();
+
                         startActivity(new Intent(LoginActivity.this, MainActivity.class));
                         finish();
                     } else {
@@ -152,4 +161,5 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
     }
+
 }
