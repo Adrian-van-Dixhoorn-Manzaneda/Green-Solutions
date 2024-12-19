@@ -3,12 +3,14 @@ package com.example.greensolutions;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
@@ -39,32 +41,42 @@ public class PerfilFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_perfil, container, false);
 
-        // Ensure user is authenticated
-        if (userEmail == null) {
-            Toast.makeText(getContext(), "Error: Usuario no autenticado", Toast.LENGTH_SHORT).show();
-            logout(view); // Redirect to login
+        // Obtener SharedPreferences
+        boolean isGoogleSignIn = requireActivity()
+                .getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE)
+                .getBoolean("isGoogleSignIn", false);
+
+        // Mostrar mensaje si el usuario inició sesión mediante Google
+        if (isGoogleSignIn) {
+            TextView messageView = new TextView(getContext());
+            messageView.setText("Para ver sus datos acceda a su cuenta de Google");
+            messageView.setTextSize(18);
+            messageView.setTextColor(getResources().getColor(android.R.color.black));
+            messageView.setGravity(Gravity.CENTER);
+
+            // Remplazar el contenido del fragmento con el mensaje
+            ((ViewGroup) view).removeAllViews();
+            ((ViewGroup) view).addView(messageView);
             return view;
         }
 
-        // Reference EditText fields
+        // Configuración existente para correo/contraseña
         EditText editTextName = view.findViewById(R.id.editTextText);
         EditText editTextEmail = view.findViewById(R.id.editTextText2);
         EditText editTextPassword = view.findViewById(R.id.editTextText3);
 
-        // Load user data from Firestore
         fetchUserDocument(editTextName, editTextEmail, editTextPassword);
 
-        // Set up edit buttons for each field
         setupEditButtons(editTextName, view.findViewById(R.id.imageButton), view.findViewById(R.id.btnAccept1), view.findViewById(R.id.btnCancel1));
         setupEditButtons(editTextEmail, view.findViewById(R.id.imageButton2), view.findViewById(R.id.btnAccept2), view.findViewById(R.id.btnCancel2));
         setupEditButtons(editTextPassword, view.findViewById(R.id.imageButton4), view.findViewById(R.id.btnAccept3), view.findViewById(R.id.btnCancel3));
 
-        // Configure the logout button
         Button botonLogout = view.findViewById(R.id.botoncerrarsesion);
         botonLogout.setOnClickListener(this::logout);
 
         return view;
     }
+
 
     private void fetchUserDocument(EditText nameField, EditText emailField, EditText passwordField) {
         // Query Firestore to find the document for the logged-in user
