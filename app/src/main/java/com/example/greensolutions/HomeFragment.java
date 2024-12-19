@@ -61,24 +61,12 @@ public class HomeFragment extends Fragment {
                     .getString("userEmail", null);
         }
 
-        // Verifica y carga el nombre del usuario
-        /**
-        if (userEmail != null) {
-            loadUserNameFromFirebase();
-        } else {
-            Log.e(TAG, "Correo del usuario no encontrado en SharedPreferences");
-        }
-         **/
+
 
         // Inicialización de vistas
         spinner = rootView.findViewById(R.id.spinner);
         imageView = rootView.findViewById(R.id.imageView);
         actionButton = rootView.findViewById(R.id.selectButton);
-<<<<<<< HEAD
-=======
-        //welcomeTextView = rootView.findViewById(R.id.tv_welcome);
->>>>>>> ebf2178df0c5669174247b1e97093780526dc6be
-
 
         // Configuración del Spinner
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, imageOptions);
@@ -182,40 +170,6 @@ public class HomeFragment extends Fragment {
         Log.d(TAG, "No hay un usuario autenticado con Google");
         return null;
     }
-
-    /**
-     * Carga el nombre del usuario desde Firebase usando su UID.
-     */
-
-    /**
-    private void loadUserNameFromFirebase() {
-        // Accede a la colección "usuarios" y busca por el campo "email"
-        firestore.collection("usuarios")
-                .whereEqualTo("email", userEmail) // Filtra documentos por el email
-                .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    if (!querySnapshot.isEmpty()) {
-                        // Toma el primer documento encontrado
-                        DocumentSnapshot document = querySnapshot.getDocuments().get(0);
-
-                        if (document.contains("nombre")) {
-                            String userName = document.getString("nombre");
-                            welcomeTextView.setText("Bienvenido, " + userName);
-                        } else {
-                            welcomeTextView.setText("Bienvenido, Usuario Desconocido");
-                        }
-                    } else {
-                        Log.e(TAG, "No se encontró un usuario con el email proporcionado");
-                        welcomeTextView.setText("Usuario no registrado");
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error al obtener el nombre del usuario", e);
-                    welcomeTextView.setText("Error al cargar los datos del usuario");
-                });
-    }
-
-    **/
 
 
     private void updateImageOptionsWithRouteIds() {
