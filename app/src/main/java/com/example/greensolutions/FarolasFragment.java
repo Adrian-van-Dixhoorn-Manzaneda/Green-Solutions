@@ -17,6 +17,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -28,6 +30,7 @@ import java.util.List;
 public class FarolasFragment extends Fragment {
 
     private ViewPager2 galleryViewPager;
+    private TabLayout galleryIndicator; // Nuevo indicador de puntos
     private Spinner farolaSpinner;
     private Button actionButton;
     private List<String> farolaIds = new ArrayList<>();
@@ -55,10 +58,10 @@ public class FarolasFragment extends Fragment {
 
         // Inicializar vistas
         galleryViewPager = rootView.findViewById(R.id.galleryViewPager);
+        galleryIndicator = rootView.findViewById(R.id.galleryIndicator); // Inicializar el TabLayout
         farolaSpinner = rootView.findViewById(R.id.farolaSpinner);
         actionButton = rootView.findViewById(R.id.selectButton);
 
-        // RecyclerView para datos del sensor
         RecyclerView recyclerView = rootView.findViewById(R.id.recycler_weather);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -73,19 +76,22 @@ public class FarolasFragment extends Fragment {
             farolaSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    // Detener las actualizaciones periódicas anteriores, si existen
                     stopFetchingFarolaSensorValues();
 
                     // Actualizar ViewPager2 con imágenes de la farola seleccionada
                     GalleryAdapter galleryAdapter = new GalleryAdapter(getContext(), farolaImages.get(position));
                     galleryViewPager.setAdapter(galleryAdapter);
 
+                    // Conectar el TabLayout al ViewPager2
+                    new TabLayoutMediator(galleryIndicator, galleryViewPager,
+                            (tab, tabPosition) -> {
+                                tab.setIcon(R.drawable.galleryicon);
+                            }).attach();
+
                     // Obtener datos de sensores para la farola seleccionada
                     String selectedFarolaId = farolaIds.get(position);
                     startFetchingFarolaSensorValues(routeId, selectedFarolaId, sensorResults -> {
-                        // Actualizar RecyclerView con datos de sensores
                         List<WeatherData> weatherData = new ArrayList<>();
-
                         weatherData.add(new WeatherData("Emergencia", sensorResults.get(0).toString(), R.drawable.no_emergency));
                         weatherData.add(new WeatherData("Gas", sensorResults.get(1).toString(), R.drawable.gas));
                         weatherData.add(new WeatherData("Humedad", sensorResults.get(2).toString() + "%", R.drawable.humidity));
@@ -105,7 +111,6 @@ public class FarolasFragment extends Fragment {
         // Configurar botón
         actionButton.setText("Terminar Ruta");
         actionButton.setOnClickListener(v -> {
-            // Navegar de vuelta al fragmento principal
             Fragment rutasFragment = new HomeFragment();
             getParentFragmentManager().beginTransaction()
                     .replace(R.id.framelayout, rutasFragment)
