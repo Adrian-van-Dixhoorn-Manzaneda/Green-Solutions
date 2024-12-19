@@ -85,20 +85,10 @@ public class FarolasFragment extends Fragment {
                     startFetchingFarolaSensorValues(routeId, selectedFarolaId, sensorResults -> {
                         // Actualizar RecyclerView con datos de sensores
                         List<WeatherData> weatherData = new ArrayList<>();
-<<<<<<< HEAD
-                        weatherData.add(new WeatherData("Emergencia", sensorResults.get(0).toString(), R.drawable.no_emergency));
+                     weatherData.add(new WeatherData("Emergencia", sensorResults.get(0).toString(), R.drawable.no_emergency));
                         weatherData.add(new WeatherData("Gas", sensorResults.get(1).toString(), R.drawable.gas));
                         weatherData.add(new WeatherData("Humedad", sensorResults.get(2).toString() + "%", R.drawable.humidity));
                         weatherData.add(new WeatherData("Temperatura", sensorResults.get(3).toString() + " ºC", R.drawable.temperatura));
-=======
-                        weatherData.add(new WeatherData("Emergencia", sensorResults.get(0).toString(), R.drawable.humidity));
-                        weatherData.add(new WeatherData("Gas", sensorResults.get(1).toString(), R.drawable.precipitation));
-                        weatherData.add(new WeatherData("Humedad", sensorResults.get(2).toString() + "%", R.drawable.wind));
-
-                        // Formatear temperatura como decimal
-                        Double temperatura = (Double) sensorResults.get(3);
-                        weatherData.add(new WeatherData("Temperatura", String.format("%.1f ºC", temperatura), R.drawable.precipitation));
->>>>>>> ebf2178df0c5669174247b1e97093780526dc6be
 
                         WeatherAdapter adapter2 = new WeatherAdapter(weatherData);
                         recyclerView.setAdapter(adapter2);

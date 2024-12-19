@@ -74,11 +74,6 @@ public class HomeFragment extends Fragment {
         spinner = rootView.findViewById(R.id.spinner);
         imageView = rootView.findViewById(R.id.imageView);
         actionButton = rootView.findViewById(R.id.selectButton);
-<<<<<<< HEAD
-=======
-        //welcomeTextView = rootView.findViewById(R.id.tv_welcome);
->>>>>>> ebf2178df0c5669174247b1e97093780526dc6be
-
 
         // Configuración del Spinner
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item, imageOptions);
