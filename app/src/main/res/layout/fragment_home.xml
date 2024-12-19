@@ -5,6 +5,7 @@
     android:orientation="vertical">
 
     <!-- Título de Bienvenida con imagen de fondo -->
+    <!--
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="100dp"
@@ -20,6 +21,8 @@
             android:textSize="20sp"
             android:textStyle="bold" />
     </LinearLayout>
+
+    -->
 
     <!-- Contenedor de galería -->
     <LinearLayout
