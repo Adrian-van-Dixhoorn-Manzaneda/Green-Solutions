@@ -129,16 +129,42 @@ public class FarolasFragment extends Fragment {
                             for (DocumentSnapshot farolaDoc : querySnapshot.getDocuments()) {
                                 farolaIds.add(farolaDoc.getId());
 
-                                //Personalizando Galeria
+                                // Personalizando Galería por rutas y farolas
+                                switch (routeId) {
+                                    case "Ruta_1":
+                                        if (farolaDoc.getId().equals("Farola_1")) {
+                                            farolaImages.add(Arrays.asList(R.drawable.ruta1v1, R.drawable.parque1, R.drawable.parque2));
+                                        } else if (farolaDoc.getId().equals("Farola_2")) {
+                                            farolaImages.add(Arrays.asList(R.drawable.ruta1v2, R.drawable.parque3, R.drawable.parque4));
+                                        } else {
+                                            farolaImages.add(Arrays.asList(R.drawable.ruta1v3, R.drawable.parque1, R.drawable.parque2));
+                                        }
+                                        break;
 
-                                if(farolaDoc.getId().equals("Farola_1")){
-                                    farolaImages.add(Arrays.asList(R.drawable.poste1, R.drawable.farola1_1, R.drawable.farola1_2));
-                                }
-                                else if(farolaDoc.getId().equals("Farola_2")){
-                                    farolaImages.add(Arrays.asList(R.drawable.poste2, R.drawable.poste2, R.drawable.poste3));
-                                }
-                                else{
-                                    farolaImages.add(Arrays.asList(R.drawable.poste3, R.drawable.poste2, R.drawable.poste3));
+                                    case "Ruta_2":
+                                        if (farolaDoc.getId().equals("Farola_1")) {
+                                            farolaImages.add(Arrays.asList(R.drawable.ruta2v1, R.drawable.parque1, R.drawable.parque2));
+                                        } else if (farolaDoc.getId().equals("Farola_2")) {
+                                            farolaImages.add(Arrays.asList(R.drawable.ruta2v2, R.drawable.parque3, R.drawable.parque4));
+                                        } else {
+                                            farolaImages.add(Arrays.asList(R.drawable.ruta2v3, R.drawable.parque1, R.drawable.parque2));
+                                        }
+                                        break;
+
+                                    case "Ruta_3":
+                                        if (farolaDoc.getId().equals("Farola_1")) {
+                                            farolaImages.add(Arrays.asList(R.drawable.ruta3v1, R.drawable.parque1, R.drawable.parque2));
+                                        } else if (farolaDoc.getId().equals("Farola_2")) {
+                                            farolaImages.add(Arrays.asList(R.drawable.ruta3v2, R.drawable.parque3, R.drawable.parque4));
+                                        } else {
+                                            farolaImages.add(Arrays.asList(R.drawable.ruta3v3, R.drawable.parque1, R.drawable.parque2));
+                                        }
+                                        break;
+
+                                    default:
+                                        Log.w(TAG, "Route ID no reconocido: " + routeId);
+                                        farolaImages.add(Arrays.asList(R.drawable.ruta1));
+                                        break;
                                 }
 
                             }

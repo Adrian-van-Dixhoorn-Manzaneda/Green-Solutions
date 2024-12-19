@@ -34,7 +34,7 @@ public class HomeFragment extends Fragment {
     private ImageView imageView;
     private Spinner spinner;
     private Button actionButton;
-    private int[] imageResIds = {R.drawable.poste1, R.drawable.poste2, R.drawable.poste3};
+    private int[] imageResIds = {R.drawable.ruta1, R.drawable.ruta2, R.drawable.ruta3};
     private String[] imageOptions = {"Ruta_1", "luigi2", "luigi3"};
     private boolean isImageFixed = false;
     private TextView welcomeTextView;
