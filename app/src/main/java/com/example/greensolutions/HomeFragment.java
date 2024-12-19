@@ -104,8 +104,8 @@ public class HomeFragment extends Fragment {
                         List<RutasData> rutasData = new ArrayList<>();
                         rutasData.add(new RutasData("Emergencia", sensorResults.get(0).toString(), R.drawable.no_emergency));
                         rutasData.add(new RutasData("Gas", sensorResults.get(1).toString(), R.drawable.gas));
-                        rutasData.add(new RutasData("Humedad", sensorResults.get(2).toString()+"km/h", R.drawable.humidity));
-                        rutasData.add(new RutasData("Temperatura", sensorResults.get(3).toString()+"%", R.drawable.temperatura));
+                        rutasData.add(new RutasData("Humedad", sensorResults.get(2).toString()+"%", R.drawable.humidity));
+                        rutasData.add(new RutasData("Temperatura", sensorResults.get(3).toString()+"ºC", R.drawable.temperatura));
 
                         RutasAdapter adapter2 = new RutasAdapter(rutasData);
                         recyclerView.setAdapter(adapter2);
@@ -232,10 +232,10 @@ public class HomeFragment extends Fragment {
                         int farolaCount = 0;
 
                         for (QueryDocumentSnapshot farolaDoc : task.getResult()) {
-                            Long emergencias = farolaDoc.getLong("Emergencias");
-                            Long gas = farolaDoc.getLong("Gas");
-                            Long humedad = farolaDoc.getLong("Humedad");
-                            Long temperatura = farolaDoc.getLong("Temperatura");
+                            Long emergencias = farolaDoc.getLong("emergencias");
+                            Long gas = farolaDoc.getLong("gas");
+                            Long humedad = farolaDoc.getLong("humedad");
+                            Long temperatura = farolaDoc.getLong("temperatura");
 
                             // Sumar valores (verifica nulos)
                             sensorResults.set(0, sensorResults.get(0) + (emergencias != null ? emergencias : 0)); // Emergencias
