@@ -1,14 +1,22 @@
 package com.example.greensolutions;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -21,6 +29,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -45,10 +57,15 @@ public class HomeFragment extends Fragment {
     private FirebaseFirestore firestore;
     private String userEmail;
 
+
+
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_home, container, false);
+
 
 
         // Inicializa Firestore
@@ -60,8 +77,6 @@ public class HomeFragment extends Fragment {
                     .getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE)
                     .getString("userEmail", null);
         }
-
-
 
         // Inicialización de vistas
         spinner = rootView.findViewById(R.id.spinner);
@@ -266,6 +281,8 @@ public class HomeFragment extends Fragment {
                     }
                 });
     }
+
+
 
 
 }
