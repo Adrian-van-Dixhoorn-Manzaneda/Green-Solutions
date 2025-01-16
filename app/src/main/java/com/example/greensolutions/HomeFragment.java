@@ -106,7 +106,7 @@ public class HomeFragment extends Fragment {
                         // Este bloque se ejecutará cuando los datos estén listos
                         Log.i(TAG, "Resultados recibidos desde el callback:");
                         Log.i(TAG, "Emergencias: " + sensorResults.get(0));
-                        Log.i(TAG, "Gas: " + sensorResults.get(1));
+                        Log.i(TAG, "Movimientos: " + sensorResults.get(1));
                         Log.i(TAG, "Humedad (promedio): " + sensorResults.get(2));
                         Log.i(TAG, "Temperatura (promedio): " + sensorResults.get(3));
 
@@ -118,7 +118,7 @@ public class HomeFragment extends Fragment {
                         // Datos para RecyclerView
                         List<RutasData> rutasData = new ArrayList<>();
                         rutasData.add(new RutasData("Emergencia", sensorResults.get(0).toString(), R.drawable.no_emergency));
-                        rutasData.add(new RutasData("Gas", sensorResults.get(1).toString(), R.drawable.gas));
+                        rutasData.add(new RutasData("Movimientos", sensorResults.get(1).toString(), R.drawable.gas));
                         rutasData.add(new RutasData("Humedad", sensorResults.get(2).toString()+"%", R.drawable.humidity));
                         rutasData.add(new RutasData("Temperatura", sensorResults.get(3).toString()+"ºC", R.drawable.temperatura));
 
@@ -248,13 +248,13 @@ public class HomeFragment extends Fragment {
 
                         for (QueryDocumentSnapshot farolaDoc : task.getResult()) {
                             Long emergencias = farolaDoc.getLong("emergencias");
-                            Long gas = farolaDoc.getLong("gas");
+                            Long movimientos = farolaDoc.getLong("movimientos");
                             Long humedad = farolaDoc.getLong("humedad");
                             Long temperatura = farolaDoc.getLong("temperatura");
 
                             // Sumar valores (verifica nulos)
                             sensorResults.set(0, sensorResults.get(0) + (emergencias != null ? emergencias : 0)); // Emergencias
-                            if (gas != null && gas == 1) sensorResults.set(1, 1L); // Gas
+                            sensorResults.set(1, sensorResults.get(1) + (movimientos != null ? movimientos : 0)); // Temperatura
                             sensorResults.set(2, sensorResults.get(2) + (humedad != null ? humedad : 0)); // Humedad
                             sensorResults.set(3, sensorResults.get(3) + (temperatura != null ? temperatura : 0)); // Temperatura
 
@@ -269,7 +269,7 @@ public class HomeFragment extends Fragment {
 
                         // Mostrar resultados en Logcat
                         Log.i(TAG, "Resultados de Sensores:");
-                        Log.i(TAG, "Emergencias: " + sensorResults.get(0));
+                        Log.i(TAG, "Movimientos: " + sensorResults.get(0));
                         Log.i(TAG, "Gas: " + sensorResults.get(1));
                         Log.i(TAG, "Humedad (promedio): " + sensorResults.get(2));
                         Log.i(TAG, "Temperatura (promedio): " + sensorResults.get(3));
