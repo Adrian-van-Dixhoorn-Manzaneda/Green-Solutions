@@ -23,6 +23,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -56,13 +60,15 @@ public class PublicarFragment extends Fragment {
                 @Override
                 public void onActivityResult(ActivityResult result) {
                     if (result.getResultCode() == AppCompatActivity.RESULT_OK && uriUltimaFoto != null) {
+                        // Muestra la foto en el ImageView
                         ponerFoto(foto, uriUltimaFoto.toString());
                     } else {
-                        Toast.makeText(requireContext(),
-                                "Foto cancelada", Toast.LENGTH_LONG).show();
+                        Toast.makeText(requireContext(), "Foto cancelada o no capturada", Toast.LENGTH_LONG).show();
+                        uriUltimaFoto = null; // Reinicia uriUltimaFoto si no se capturó la foto
                     }
                 }
             });
+
 
     @Nullable
     @Override
@@ -98,38 +104,78 @@ public class PublicarFragment extends Fragment {
 
             if (Build.VERSION.SDK_INT >= 24) {
                 uriUltimaFoto = FileProvider.getUriForFile(
-                        requireContext(), "es.upv.lfuster.greensolutions.fileProvider", file);
+                        requireContext(), "com.example.greensolutions.fileProvider", file);
             } else {
                 uriUltimaFoto = Uri.fromFile(file);
             }
+
+            // Asegúrate de que uriUltimaFoto no sea nula
+            if (uriUltimaFoto == null) {
+                Toast.makeText(requireContext(), "Error al crear URI para la foto", Toast.LENGTH_LONG).show();
+                return;
+            }
+
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             intent.putExtra(MediaStore.EXTRA_OUTPUT, uriUltimaFoto);
             tomarFotoLauncher.launch(intent);
+
         } catch (IOException ex) {
-            Toast.makeText(requireContext(), "Error al crear fichero de imagen",
-                    Toast.LENGTH_LONG).show();
+            Toast.makeText(requireContext(), "Error al crear fichero de imagen", Toast.LENGTH_LONG).show();
         }
     }
+
 
     protected void ponerFoto(ImageView imageView, String uri) {
         if (uri != null && !uri.isEmpty() && !uri.equals("null")) {
-            imageView.setImageURI(Uri.parse(uri));
+            // Usar Glide para cargar la imagen
+            Glide.with(this)
+                    .load(Uri.parse(uri))
+                    .placeholder(R.drawable.gas) // Imagen de carga
+                    .error(R.drawable.baseline_close_24) // Imagen de error
+                    .into(imageView);
         } else {
-            imageView.setImageBitmap(null);
+            imageView.setImageResource(R.drawable.emergency); // Imagen predeterminada
         }
     }
 
-    // Aquí hay que poner el fragment de la galeria de fotos publicadas
     public void publicarFoto(View view) {
-        TextView notificacion = getView().findViewById(R.id.notificacion); // Obtén el TextView de notificación
-        if (uriUltimaFoto != null) {
-            // Mostrar el mensaje de notificación
-            notificacion.setVisibility(View.VISIBLE);
-            notificacion.setText("Foto publicada con éxito");
-        } else {
-            // Mostrar un aviso si no hay foto seleccionada
-            Toast.makeText(requireContext(), "No se ha seleccionado una foto", Toast.LENGTH_LONG).show();
+        TextView notificacion = getView().findViewById(R.id.notificacion);
+
+        // Valida si se seleccionó o capturó una foto
+        if (uriUltimaFoto == null) {
+            Toast.makeText(requireContext(), "No se ha seleccionado ni capturado una foto", Toast.LENGTH_LONG).show();
+            return;
         }
+
+        // Muestra un mensaje de carga
+        notificacion.setVisibility(View.VISIBLE);
+        notificacion.setText("Subiendo foto, por favor espera...");
+
+        // Referencia a Firebase Storage
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReference();
+        String nombreCarpeta = "Farola_1"; // Cambia según la carpeta que desees
+        String nombreArchivo = "img_" + System.currentTimeMillis() + ".jpg";
+        StorageReference fotoRef = storageRef.child(nombreCarpeta + "/" + nombreArchivo);
+
+        // Subir el archivo
+        fotoRef.putFile(uriUltimaFoto)
+                .addOnSuccessListener(taskSnapshot -> {
+                    fotoRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                        String urlFoto = uri.toString();
+
+                        // Actualiza la notificación
+                        notificacion.setText("Foto publicada con éxito: " + urlFoto);
+                        Toast.makeText(requireContext(), "Foto subida correctamente", Toast.LENGTH_LONG).show();
+                    }).addOnFailureListener(e -> {
+                        notificacion.setText("Error al obtener la URL de la foto");
+                        Toast.makeText(requireContext(), "Error al obtener la URL: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    notificacion.setText("Error al subir la foto");
+                    Toast.makeText(requireContext(), "Error al subir la foto: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
     }
 
 }
