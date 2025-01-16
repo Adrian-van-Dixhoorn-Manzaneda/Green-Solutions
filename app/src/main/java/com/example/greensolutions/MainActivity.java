@@ -5,8 +5,10 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -55,12 +57,14 @@ public class MainActivity extends AppCompatActivity {
     private static final String CHANNEL_ID = "Smart Nature";
     private static final int NOTIFICATION_PERMISSION_REQUEST_CODE = 1;
 
+    private boolean lastStatusNormal = false;  // Bandera para el último estado normal
+    private boolean isNotificationScheduled = false;  // Bandera para evitar mostrar notificación repetida
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
 
         // Inicializar Firebase
         /**
@@ -75,9 +79,21 @@ public class MainActivity extends AppCompatActivity {
         firestore = FirebaseFirestore.getInstance();
 
 
-        //ejecuta las notificacion si las hay
-        requestNotificationPermission();
-        checkAndShowNotification();
+        // Configura un cronómetro (Handler)
+        Handler handler = new Handler();
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                requestNotificationPermission();
+                checkAndShowNotification();
+
+                // Repetir la tarea cada 10 segundos (ajusta el tiempo según tus necesidades)
+                handler.postDelayed(this, 10000);
+            }
+        };
+
+        // Inicia la ejecución de la tarea en el cronómetro
+        handler.post(runnable);
 
 
         setContentView(R.layout.activity_main);
@@ -86,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Configura la Toolbar como ActionBar
         setSupportActionBar(toolbar);
-
 
         // Configura la navegación inferior
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
@@ -253,35 +268,37 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkAndShowNotification() {
-        // Definir la ruta a consultar (ruta_1)
         String routeId = "Ruta_1";
-        // Consultar los valores de gas y emergencia en la farola de la ruta
+
         getFarolaSensorValues(routeId, sensorResults -> {
-            // Obtener los valores de gas y emergencia
             Long gas = sensorResults.get(1);
             Long emergencia = sensorResults.get(0);
 
-            // Verificar la condición de gas o emergencia
             if (gas != 0 || emergencia != 0) {
-                // Componer el mensaje de la notificación y el popup
-                String routeName = "Ruta 1";  // Se asume que la ruta es "ruta_1" para simplificar
-                String message = "";
+                lastStatusNormal = false;
+                if (!isNotificationScheduled) {
+                    String routeName = "Ruta 1";
+                    String message = gas != 0 ? "Fuego Detectado en " + routeName :
+                            "Emergencia Detectada en " + routeName;
 
-                if (gas != 0) {
-                    message = "Alerta de gas detectada en " + routeName;
-                    showNotification(message, 1); // Mostrar notificación de gas
-                    showPopup(message, 0);  // Mostrar popup de gas
+                    int alertColor = gas != 0 ? Color.RED : Color.RED; // Siempre rojo para alertas
+                    showNotification(message, gas != 0 ? 1 : 2);
+                    showPopup(message, gas != 0 ? 0 : 200, alertColor);
+
+                    isNotificationScheduled = true;
+                    new Handler().postDelayed(() -> isNotificationScheduled = false, 20000);
                 }
-                if (emergencia != 0) {
-                    message = "Alerta de emergencia detectada en " + routeName;
-                    showNotification(message, 2); // Mostrar notificación de emergencia
-                    showPopup(message, 200);  // Mostrar popup de emergencia
+            } else {
+                if (!lastStatusNormal) {
+                    String message = "Todo en orden en la Ruta 1";
+                    int alertColor = Color.GREEN; // Verde para estado normal
+                    showPopup(message, 0, alertColor);
+                    lastStatusNormal = true;
                 }
             }
+
         });
     }
-
-
 
     private void showNotification(String message, int notificationId) {
         createNotificationChannel();
@@ -316,15 +333,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void showPopup(String message, int yOffset) {
+    private void showPopup(String message, int yOffset, int alertColor) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = getLayoutInflater();
         View customView = inflater.inflate(R.layout.popup_alert, null);
 
         TextView messageView = customView.findViewById(R.id.message);
         ImageButton closeButton = customView.findViewById(R.id.close_button);
+        View alertBackground = customView.findViewById(R.id.alert_background);
 
         messageView.setText(message);
+
+        // Cambia el color de fondo según el parámetro alertColor
+        alertBackground.setBackgroundColor(alertColor);
 
         // Crea el diálogo primero
         AlertDialog dialog = builder.setView(customView).create();
@@ -334,11 +355,12 @@ public class MainActivity extends AppCompatActivity {
 
         // Establece la posición y muestra el diálogo
         if (dialog.getWindow() != null) {
-            dialog.getWindow().setGravity(Gravity.TOP);
+            dialog.getWindow().setGravity(Gravity.CENTER);
             dialog.getWindow().getAttributes().y = yOffset;
         }
 
         dialog.show();
     }
+
 
 }
