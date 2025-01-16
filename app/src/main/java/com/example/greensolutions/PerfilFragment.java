@@ -3,14 +3,12 @@ package com.example.greensolutions;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
@@ -41,25 +39,6 @@ public class PerfilFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_perfil, container, false);
 
-        // Obtener SharedPreferences
-        boolean isGoogleSignIn = requireActivity()
-                .getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE)
-                .getBoolean("isGoogleSignIn", false);
-
-        // Mostrar mensaje si el usuario inició sesión mediante Google
-        if (isGoogleSignIn) {
-            TextView messageView = new TextView(getContext());
-            messageView.setText("Para ver sus datos acceda a su cuenta de Google");
-            messageView.setTextSize(18);
-            messageView.setTextColor(getResources().getColor(android.R.color.black));
-            messageView.setGravity(Gravity.CENTER);
-
-            // Remplazar el contenido del fragmento con el mensaje
-            ((ViewGroup) view).removeAllViews();
-            ((ViewGroup) view).addView(messageView);
-            return view;
-        }
-
         // Configuración existente para correo/contraseña
         EditText editTextName = view.findViewById(R.id.editTextText);
         EditText editTextEmail = view.findViewById(R.id.editTextText2);
@@ -74,8 +53,41 @@ public class PerfilFragment extends Fragment {
         Button botonLogout = view.findViewById(R.id.botoncerrarsesion);
         botonLogout.setOnClickListener(this::logout);
 
+        // Obtener SharedPreferences
+        boolean isGoogleSignIn = requireActivity()
+                .getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE)
+                .getBoolean("isGoogleSignIn", false);
+
+        // Mostrar mensaje si el usuario inició sesión mediante Google
+        if (isGoogleSignIn) {
+            // Hacer invisibles todos los elementos excepto el botón de cerrar sesión
+            view.findViewById(R.id.editTextText).setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.editTextText2).setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.editTextText3).setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.imageButton).setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.imageButton2).setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.imageButton4).setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.btnAccept1).setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.btnAccept2).setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.btnAccept3).setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.btnCancel1).setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.btnCancel2).setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.btnCancel3).setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.textView7).setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.textView9).setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.textView10).setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.textView8).setVisibility(View.INVISIBLE);
+
+            view.findViewById(R.id.textView12).setVisibility(View.VISIBLE);
+
+            botonLogout.setVisibility(View.VISIBLE);
+
+            return view;
+        }
+
         return view;
     }
+
 
 
     private void fetchUserDocument(EditText nameField, EditText emailField, EditText passwordField) {
