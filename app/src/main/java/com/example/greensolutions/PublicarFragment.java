@@ -41,11 +41,12 @@ public class PublicarFragment extends Fragment {
             new ActivityResultCallback<ActivityResult>() {
                 @Override
                 public void onActivityResult(ActivityResult result) {
-                    if (result.getResultCode() == AppCompatActivity.RESULT_OK) {
+                    if (result.getResultCode() == AppCompatActivity.RESULT_OK && result.getData() != null) {
                         Uri uri = result.getData().getData();
                         requireContext().getContentResolver().takePersistableUriPermission(uri,
                                 Intent.FLAG_GRANT_READ_URI_PERMISSION);
                         lugar.setFoto(uri.toString());
+                        uriUltimaFoto = uri; // Actualiza uriUltimaFoto con la URI de la galería
                         ponerFoto(foto, uri.toString());
                     } else {
                         Toast.makeText(requireContext(),
@@ -69,7 +70,6 @@ public class PublicarFragment extends Fragment {
                 }
             });
 
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -82,10 +82,6 @@ public class PublicarFragment extends Fragment {
         view.findViewById(R.id.publicar).setOnClickListener(this::publicarFoto);
 
         return view;
-    }
-
-    public void actualizaVistas() {
-        ponerFoto(foto, lugar.getFoto());
     }
 
     public void fotoDeGaleria(View view) {
@@ -109,7 +105,6 @@ public class PublicarFragment extends Fragment {
                 uriUltimaFoto = Uri.fromFile(file);
             }
 
-            // Asegúrate de que uriUltimaFoto no sea nula
             if (uriUltimaFoto == null) {
                 Toast.makeText(requireContext(), "Error al crear URI para la foto", Toast.LENGTH_LONG).show();
                 return;
@@ -124,17 +119,15 @@ public class PublicarFragment extends Fragment {
         }
     }
 
-
     protected void ponerFoto(ImageView imageView, String uri) {
         if (uri != null && !uri.isEmpty() && !uri.equals("null")) {
-            // Usar Glide para cargar la imagen
             Glide.with(this)
                     .load(Uri.parse(uri))
-                    .placeholder(R.drawable.gas) // Imagen de carga
-                    .error(R.drawable.baseline_close_24) // Imagen de error
+                    .placeholder(R.drawable.gas)
+                    .error(R.drawable.baseline_close_24)
                     .into(imageView);
         } else {
-            imageView.setImageResource(R.drawable.emergency); // Imagen predeterminada
+            imageView.setImageResource(R.drawable.emergency);
         }
     }
 
@@ -142,7 +135,7 @@ public class PublicarFragment extends Fragment {
         TextView notificacion = getView().findViewById(R.id.notificacion);
 
         // Valida si se seleccionó o capturó una foto
-        if (uriUltimaFoto == null) {
+        if (uriUltimaFoto == null && (lugar.getFoto() == null || lugar.getFoto().isEmpty())) {
             Toast.makeText(requireContext(), "No se ha seleccionado ni capturado una foto", Toast.LENGTH_LONG).show();
             return;
         }
@@ -158,24 +151,19 @@ public class PublicarFragment extends Fragment {
         String nombreArchivo = "img_" + System.currentTimeMillis() + ".jpg";
         StorageReference fotoRef = storageRef.child(nombreCarpeta + "/" + nombreArchivo);
 
-        // Subir el archivo
-        fotoRef.putFile(uriUltimaFoto)
-                .addOnSuccessListener(taskSnapshot -> {
-                    fotoRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                        String urlFoto = uri.toString();
+        // Determina la URI a subir
+        Uri uriParaSubir = uriUltimaFoto != null ? uriUltimaFoto : Uri.parse(lugar.getFoto());
 
-                        // Actualiza la notificación
-                        notificacion.setText("Foto publicada con éxito: " + urlFoto);
-                        Toast.makeText(requireContext(), "Foto subida correctamente", Toast.LENGTH_LONG).show();
-                    }).addOnFailureListener(e -> {
-                        notificacion.setText("Error al obtener la URL de la foto");
-                        Toast.makeText(requireContext(), "Error al obtener la URL: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                    });
+        // Subir el archivo
+        fotoRef.putFile(uriParaSubir)
+                .addOnSuccessListener(taskSnapshot -> {
+                    notificacion.setText("Foto publicada con éxito.");
+                    Toast.makeText(requireContext(), "Foto subida correctamente", Toast.LENGTH_LONG).show();
                 })
                 .addOnFailureListener(e -> {
-                    notificacion.setText("Error al subir la foto");
+                    notificacion.setText("Error al subir la foto.");
                     Toast.makeText(requireContext(), "Error al subir la foto: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
     }
-
 }
+
