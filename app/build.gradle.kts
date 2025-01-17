@@ -49,6 +49,7 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
+    implementation ("androidx.work:work-runtime:2.7.1")
     implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.firebaseui:firebase-ui-auth:7.2.0")
@@ -56,5 +57,21 @@ dependencies {
     implementation ("com.google.android.gms:play-services-auth:20.6.0")
     implementation ("com.google.firebase:firebase-auth:22.1.0'")
     implementation ("com.google.android.material:material:1.9.0")
+
+
+    implementation (platform("com.google.firebase:firebase-bom:32.2.0"))
+
+    // Firebase Storage
+    implementation ("com.google.firebase:firebase-storage")
+
+    // Firebase Firestore (si necesitas guardar datos relacionados)
+    implementation ("com.google.firebase:firebase-firestore")
+
+    // Otras dependencias necesarias para tu proyecto, como autenticación
+    implementation ("com.google.firebase:firebase-auth")
+
+    // Si usas Glide para cargar imágenes
+    implementation ("com.github.bumptech.glide:glide:4.15.1")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.15.1")
 
 }

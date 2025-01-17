@@ -93,7 +93,7 @@ public class FarolasFragment extends Fragment {
                     startFetchingFarolaSensorValues(routeId, selectedFarolaId, sensorResults -> {
                         List<WeatherData> weatherData = new ArrayList<>();
                         weatherData.add(new WeatherData("Emergencia", sensorResults.get(0).toString(), R.drawable.no_emergency));
-                        weatherData.add(new WeatherData("Gas", sensorResults.get(1).toString(), R.drawable.gas));
+                        weatherData.add(new WeatherData("Movimientos", sensorResults.get(1).toString(), R.drawable.gas));
                         weatherData.add(new WeatherData("Humedad", sensorResults.get(2).toString() + "%", R.drawable.humidity));
                         weatherData.add(new WeatherData("Temperatura", sensorResults.get(3).toString() + " ºC", R.drawable.temperatura));
                         WeatherAdapter adapter2 = new WeatherAdapter(weatherData);
@@ -214,7 +214,7 @@ public class FarolasFragment extends Fragment {
                                 DocumentSnapshot farolaDoc = task.getResult();
                                 List<Object> sensorResults = new ArrayList<>(Arrays.asList(
                                         farolaDoc.getLong("emergencias") != null ? farolaDoc.getLong("emergencias") : 0,
-                                        farolaDoc.getLong("gas") != null ? farolaDoc.getLong("gas") : 0,
+                                        farolaDoc.getLong("movimientos") != null ? farolaDoc.getLong("movimientos") : 0,
                                         farolaDoc.getLong("humedad") != null ? farolaDoc.getLong("humedad") : 0,
                                         farolaDoc.getDouble("temperatura") != null ? farolaDoc.getDouble("temperatura") : 0.0
                                 ));
