@@ -22,6 +22,8 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,10 +45,15 @@ public class FarolasFragment extends Fragment {
     private Runnable sensorRefreshTask;
     private final long refreshInterval = 5000;
 
+    private List<String> imageUrls = new ArrayList<>();
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_farolas, container, false);
 
+
+        fetchImageUrlsFromFarola1();
         // Recibir el routeId
         Bundle args = getArguments();
         if (args != null) {
@@ -58,7 +65,7 @@ public class FarolasFragment extends Fragment {
 
         // Inicializar vistas
         galleryViewPager = rootView.findViewById(R.id.galleryViewPager);
-        galleryIndicator = rootView.findViewById(R.id.galleryIndicator); // Inicializar el TabLayout
+        galleryIndicator = rootView.findViewById(R.id.galleryIndicator);
         farolaSpinner = rootView.findViewById(R.id.farolaSpinner);
         actionButton = rootView.findViewById(R.id.selectButton);
 
@@ -233,6 +240,31 @@ public class FarolasFragment extends Fragment {
 
         // Iniciar la tarea periódica
         handler.post(sensorRefreshTask);
+    }
+
+
+    public void fetchImageUrlsFromFarola1() {
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference farola1Ref = storage.getReference().child("Farola_1");
+
+        farola1Ref.listAll()
+                .addOnSuccessListener(listResult -> {
+                    for (StorageReference item : listResult.getItems()) {
+                        // Obtener la URL de descarga para cada imagen
+                        item.getDownloadUrl()
+                                .addOnSuccessListener(uri -> {
+                                    String url = uri.toString();
+                                    imageUrls.add(url); // Guardar en la variable de clase
+                                    Log.i("FirebaseStorage", "URL de imagen encontrada: " + url);
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e("FirebaseStorage", "Error al obtener URL de la imagen: " + e.getMessage(), e);
+                                });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("FirebaseStorage", "Error al listar imágenes: " + e.getMessage(), e);
+                });
     }
 
     /**
